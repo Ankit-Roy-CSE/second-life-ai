@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:**_(not started — initialized from build plan)_ · **Updated by:**_—_
+**Last updated:** 2026-06-13 · **Updated by:** A
 
 ---
 
@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 0 | 0 | 0 | 11 |
+| Phase 0 — Foundation | 11 | 1 | 0 | 0 | 10 |
 | Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **0** | **0** | **0** | **34** |
+| **Total** | **34** | **1** | **0** | **0** | **33** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -40,7 +40,7 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-| P0-A1 | A | Monorepo scaffold (`.gitignore`, README, `.env.example`) | 📋 Not started | — | — |
+| P0-A1 | A | Monorepo scaffold (`.gitignore`, README, `.env.example`) | ✅ Done | Folder structure, all service stubs, Dockerfiles, docker-compose.yml, infra/postgres/init.sql, pyproject.toml, .gitignore, .env.example, README.md | a/scaffold/p0-a1 |
 | P0-A2 | A | Docker Compose (Postgres multi-DB, Redis, MinIO) | 📋 Not started | — | — |
 | P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | 📋 Not started | — | — |
 | P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | 📋 Not started | — | — |
