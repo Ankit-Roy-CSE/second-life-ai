@@ -61,7 +61,7 @@ with its own database, Dockerfile, and port. **Owner** indicates the responsible
 
 | Service | Owner | Port | Database | Responsibility |
 |---------|-------|------|----------|----------------|
-| **API Gateway / BFF** (`gateway`) | A | 8000 | _none_ | Single entry point for the frontend; routes/aggregates calls to services; verifies JWTs; exposes a read-model for dashboards. |
+| **API Gateway / BFF** (`gateway`) | A | 8000 | `slmai_gateway` | Single entry point for the frontend; routes/aggregates calls to services; verifies JWTs; owns Return entity; exposes a read-model for dashboards. |
 | **User Service** (`user`) | A | 8001 | `slmai_user` | Auth (register/login/JWT), user profile, preferences, green-credit balance. |
 | **AI Grading Service** (`grading`) | B | 8002 | `slmai_grading` | Analyze images/video + return reason → condition grade, confidence, damage summary. Emits `ProductGraded`. |
 | **Lifecycle Decision Service** (`lifecycle`) | B | 8003 | `slmai_lifecycle` | Decide next action (Resell / Refurbish / Donate / Recycle / Hyperlocal) + value-recovery estimate. Emits `LifecycleDecisionCreated`. |
