@@ -266,7 +266,7 @@ A task is **Done** only when all of the following hold:
 - [ ] Matches the contract (OpenAPI / event payload / TS types) and architecture boundaries.
 - [ ] Lint + format pass (ruff/black or eslint/prettier); type-check passes (mypy-clean hints / `tsc`).
 - [ ] At least the minimum tests exist and pass; `AI_MODE=mock` path works with no AWS keys.
-- [ ] Runs locally via Docker Compose / `pnpm dev` without manual patching.
+- [ ] Runs locally via Docker Compose / `npm run dev` without manual patching.
 - [ ] UI work uses only tokens and existing registry components where applicable.
 - [ ] Health/`ready` still green; no secrets or stray `print`/`console.log` left behind.
 - [ ] [progress-tracker.md](progress-tracker.md) row updated (status, notes, link). New

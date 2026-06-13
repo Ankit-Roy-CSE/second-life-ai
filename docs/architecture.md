@@ -45,7 +45,7 @@ for in a sustainability ledger.
 | Object storage | MinIO (S3-compatible) | Product images/videos |
 | AI | AWS Bedrock (reasoning/summaries) + Rekognition (vision)| Behind shared `ai` wrapper + mock |
 | Auth | JWT (python-jose), passlib[bcrypt] | Issued by User Service |
-| Packaging / dev | Docker, Docker Compose, uv/pip, pnpm | Local-first |
+| Packaging / dev | Docker, Docker Compose, uv/pip, npm | Local-first |
 | Quality | ruff + black (Py), eslint + prettier (TS), pytest/vitest| See code-standards.md |
 
 >**Version pins live in [library-docs.md](library-docs.md).** Do not introduce a library
@@ -369,7 +369,7 @@ apps/web/
 
 | Environment | What runs where |
 |-------------|-----------------|
-| **Local (primary)** | `docker compose up` → Postgres, Redis, MinIO, all 7 backend services. Web runs `pnpm dev` (or in compose). `AI_MODE=mock` by default. |
+| **Local (primary)** | `docker compose up` → Postgres, Redis, MinIO, all 7 backend services. Web runs `npm run dev` (or in compose). `AI_MODE=mock` by default. |
 | **Demo** | Frontend on **Vercel** (`apps/web`), pointing at the Gateway URL via `NEXT_PUBLIC_API_BASE_URL`. Backend stays local (tunnel) or on a single cloud VM. `AI_MODE=aws` or `hybrid` if AWS keys are present. |
 | **AI** | AWS Bedrock + Rekognition reached directly from `grading`/`lifecycle`/`matching` via the shared wrapper. Optional; mock covers the demo if keys are absent. |
 

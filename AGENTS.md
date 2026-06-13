@@ -256,11 +256,11 @@ ruff check . && black --check .      # lint + format
 
 cd apps/web
 
-pnpm install
+npm install
 
-pnpm dev                             # [http://localhost:3000](http://localhost:3000 "http://localhost:3000/")
+npm run dev                             # [http://localhost:3000](http://localhost:3000 "http://localhost:3000/")
 
-pnpm lint && pnpm build
+npm run lint && npm run build
 
 # Seed demo data (after services are up)
 
