@@ -34,6 +34,18 @@ def _hash_input(value: Any) -> int:
     return int(hashlib.md5(content).hexdigest()[:8], 16)
 
 
+def _media_seed(media_keys: list[str], return_reason: str = "", product_category: str = "") -> int:
+    """
+    Deterministic seed from media keys, falling back to reason+category if empty.
+    
+    This ensures products without media still get varied (but deterministic) grades
+    rather than all hashing to the same "default" value.
+    """
+    if media_keys:
+        return _hash_input(media_keys[0])
+    return _hash_input(f"{return_reason}:{product_category}")
+
+
 def _grade_from_seed(seed: int) -> Grade:
     """Map seed to a Grade using deterministic distribution."""
     bucket = seed % 100
@@ -102,8 +114,7 @@ def mock_analyze_media(media_keys: list[str], return_reason: str, product_catego
     
     Returns deterministic labels seeded from the first media filename.
     """
-    # Seed from first media key
-    seed = _hash_input(media_keys[0] if media_keys else "default")
+    seed = _media_seed(media_keys, return_reason, product_category)
 
     # Generate realistic labels based on category
     category_labels = {
@@ -169,7 +180,7 @@ def mock_grade_product(
     
     Combines analyze_media + defect generation + summarize_damage.
     """
-    seed = _hash_input(media_keys[0] if media_keys else "default")
+    seed = _media_seed(media_keys, return_reason, product_category)
 
     # Determine grade from seed
     grade = _grade_from_seed(seed)
