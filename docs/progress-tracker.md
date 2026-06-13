@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-13 · **Updated by:** A
+**Last updated:** 2026-06-13 · **Updated by:** A · **Latest:** P0-A5 shared contracts complete — **ALL Member A Phase 0 tasks done!**
 
 ---
 
@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 3 | 0 | 0 | 8 |
+| Phase 0 — Foundation | 11 | 5 | 0 | 0 | 6 |
 | Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **3** | **0** | **0** | **31** |
+| **Total** | **34** | **5** | **0** | **0** | **29** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -43,8 +43,8 @@
 | P0-A1 | A | Monorepo scaffold (`.gitignore`, README, `.env.example`) | ✅ Done | Folder structure, all service stubs, Dockerfiles, docker-compose.yml, infra/postgres/init.sql, pyproject.toml, .gitignore, .env.example, README.md | a/scaffold/p0-a1 |
 | P0-A2 | A | Docker Compose (Postgres multi-DB, Redis, MinIO) | ✅ Done | docker-compose.yml with all 7 services + Postgres 16 (6 DBs via init.sql), Redis 7, MinIO (pinned release) + minio-init bucket setup; healthchecks on all infra; curl added to all service images; dev.sh + dev.ps1 helper scripts | a/infra/p0-a2 |
 | P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | ✅ Done | `shared_py.web.create_app()` factory with CORS, CorrelationId + RequestLogging middleware, /health + /ready endpoints, ErrorEnvelope handlers, AppError; `shared_py.config` base settings + structured JSON logging; `shared_py.web.auth` JWT helpers; all service main.py + config.py updated to use BaseServiceSettings; tests in packages/shared-py/tests/test_web.py | a/shared/p0-a3 |
-| P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | 📋 Not started | — | — |
-| P0-A5 | A | Shared contracts (enums+events+REST stubs+cross-service reads) | 📋 Not started | — | — |
+| P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | ✅ Done | Redis Streams publish/subscribe wrapper with EventEnvelope, idempotency via event_id dedupe, retry→DLQ after MAX_RETRIES, all 10 event schemas from architecture.md §6, comprehensive tests; files: events/client.py (publish + Redis singleton), events/handlers.py (@subscribe decorator + consumer loop + DLQ), events/schemas.py (EventEnvelope + 10 event payload models), tests/test_events.py | a/events/p0-a4 |
+| P0-A5 | A | Shared contracts (enums+events+REST stubs+cross-service reads) | ✅ Done | Python: enums.py (5 enums: Grade, LifecycleAction, ReturnStatus, ListingChannel, ListingStatus), rest_contracts.py (cross-service DTOs: UserCandidatesListResponse for Matching→User, ReturnResponse/ProductResponse ownership, PaginatedResponse standard), SERVICE_ENDPOINTS.md (complete REST catalog for all 7 services); TypeScript: enums.ts, events.ts (10 event types), api.ts (full API response types), index.ts, README.md; contracts ready for Phase 1 | a/contracts/p0-a5 |
 | P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | 📋 Not started | — | — |
 | P0-B2 | B | Minimal seed/fixtures (`scripts/seed_min.py`) | 📋 Not started | — | — |
 | P0-B3 | B | Event-saga observability (tail + `/debug/events` + replay) | 📋 Not started | — | — |
