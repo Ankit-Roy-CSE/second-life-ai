@@ -94,7 +94,7 @@ services:
       start_period: 5s
 
   minio:
-    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -116,7 +116,7 @@ services:
 
   # Creates the slmai-media bucket on first run then exits cleanly.
   minio-init:
-    image: minio/mc:RELEASE.2024-06-13T22-53-53Z
+    image: minio/mc:latest
     depends_on:
       minio:
         condition: service_healthy

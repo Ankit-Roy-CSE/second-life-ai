@@ -168,7 +168,7 @@ A task is done only when: it matches the contract & architecture boundaries; lin
 
 check pass; minimum tests pass and the `AI_MODE=mock` path works keyless; it runs locally via
 
-Docker Compose / `pnpm dev`; UI uses only tokens + registry components; no secrets or stray
+Docker Compose / `npm run dev`; UI uses only tokens + registry components; no secrets or stray
 
 debug logging; and ****[docs/progress-tracker.md](**docs/progress-tracker.md**)**** (and
 
