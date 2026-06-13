@@ -1,4 +1,4 @@
-# UI Design Tokens — AZ Second Life AI
+# UI Design Tokens — Amazon Second Life AI
 
 >**Single source of truth for all visual values.** Every color, font size, space, radius,
 > and shadow used in the codebase comes from here. Tokens are implemented in

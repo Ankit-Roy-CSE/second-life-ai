@@ -1,4 +1,4 @@
-# Progress Tracker — AZ Second Life AI
+# Progress Tracker — Amazon Second Life AI
 
 >**Single source of truth for build status.** This mirrors every task ID in
 > [build-plan.md](build-plan.md) 1:1. **Update the relevant row immediately after finishing a

@@ -1,4 +1,4 @@
-# Build Plan — AZ Second Life AI
+# Build Plan — Amazon Second Life AI
 
 >**Phase-wise parallel build plan for a 3-person, 24–48h hackathon.** Each task has a stable
 > ID (`P<phase>-<member><n>`). [progress-tracker.md](progress-tracker.md) mirrors these IDs

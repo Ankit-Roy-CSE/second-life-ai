@@ -1,4 +1,4 @@
-# UI Component Registry — AZ Second Life AI
+# UI Component Registry — Amazon Second Life AI
 
 >**Living registry of every UI component.** Before building a component, search this file.
 > **If it exists, reuse it. If a close match exists, extend it. Only invent when nothing

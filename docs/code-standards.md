@@ -1,4 +1,4 @@
-# Code Standards — AZ Second Life AI
+# Code Standards — Amazon Second Life AI
 
 >**Implementation rules for the whole monorepo.** These are non-negotiable conventions so
 > three people (and their agents) produce code that fits together. When in doubt, match the

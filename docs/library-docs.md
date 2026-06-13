@@ -1,4 +1,4 @@
-# Library Docs — AZ Second Life AI
+# Library Docs — Amazon Second Life AI
 
 >**Project-specific usage rules for every third-party library** (outside the language
 > standard library). Before using a library, read its entry here. Before adding a **new**

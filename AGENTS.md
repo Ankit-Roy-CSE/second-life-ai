@@ -1,4 +1,4 @@
-**# AGENTS.md — AZ Second Life AI**
+**# AGENTS.md — Amazon Second Life AI**
 
 > ****Start here.**** This is the entry point for every AI agent and engineer working in this
 
@@ -12,7 +12,7 @@
 
 **## What we're building**
 
-****AZ Second Life AI**** — an event-driven microservices platform that decides the best, most
+****Amazon Second Life AI**** — an event-driven microservices platform that decides the best, most
 
 sustainable "second life" for every returned product (Resell / Refurbish / Donate / Recycle /
 

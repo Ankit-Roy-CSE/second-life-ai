@@ -1,4 +1,4 @@
-# UI Rules — AZ Second Life AI
+# UI Rules — Amazon Second Life AI
 
 >**Concise, enforceable rules for building the UI.** Pair with [ui-tokens.md](ui-tokens.md)
 > (the values) and [ui-registry.md](ui-registry.md) (the components). If a rule here conflicts

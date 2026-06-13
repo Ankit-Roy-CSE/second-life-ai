@@ -1,4 +1,4 @@
-# Architecture — AZ Second Life AI
+# Architecture — Amazon Second Life AI
 
 >**Audience:** AI agents and engineers building the system. This is the authoritative
 > description of services, data, events, and infrastructure. If code and this document
@@ -8,7 +8,7 @@
 
 ## 1. System Overview
 
-AZ Second Life AI is an event-driven **microservices** platform that decides the most
+Amazon Second Life AI is an event-driven **microservices** platform that decides the most
 valuable, most sustainable "next life" for every returned product. A return enters the
 system, is graded by AI, routed by a lifecycle decision engine, given a digital passport,
 matched to a nearby buyer (or listed in a refurbished marketplace), and finally accounted
