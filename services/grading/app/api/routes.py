@@ -43,19 +43,33 @@ async def get_grade(
 
 @router.get("", response_model=GradeListResponse)
 async def list_grades(
+    return_id: str | None = Query(default=None, description="Filter by return_id"),
+    product_id: str | None = Query(default=None, description="Filter by product_id"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    List all grades (paginated). Primarily for debugging and admin views.
+    List grades (paginated), optionally filtered by return_id/product_id.
+
+    Query params match the contract in SERVICE_ENDPOINTS.md (Grading Service).
     """
-    total_result = await db.execute(select(func.count(Grade.id)))
+    filters = []
+    if return_id is not None:
+        filters.append(Grade.return_id == return_id)
+    if product_id is not None:
+        filters.append(Grade.product_id == product_id)
+
+    count_stmt = select(func.count(Grade.id))
+    list_stmt = select(Grade).order_by(Grade.created_at.desc())
+    for f in filters:
+        count_stmt = count_stmt.where(f)
+        list_stmt = list_stmt.where(f)
+
+    total_result = await db.execute(count_stmt)
     total = total_result.scalar_one()
 
-    result = await db.execute(
-        select(Grade).order_by(Grade.created_at.desc()).limit(limit).offset(offset)
-    )
+    result = await db.execute(list_stmt.limit(limit).offset(offset))
     items = result.scalars().all()
 
     return GradeListResponse(items=list(items), total=total)

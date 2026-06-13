@@ -43,22 +43,33 @@ async def get_decision(
 
 @router.get("", response_model=DecisionListResponse)
 async def list_decisions(
+    return_id: str | None = Query(default=None, description="Filter by return_id"),
+    grade_id: str | None = Query(default=None, description="Filter by grade_id"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    List all lifecycle decisions (paginated). Primarily for debugging and admin views.
+    List lifecycle decisions (paginated), optionally filtered by return_id/grade_id.
+
+    Query params match the contract in SERVICE_ENDPOINTS.md (Lifecycle Service).
     """
-    total_result = await db.execute(select(func.count(LifecycleDecision.id)))
+    filters = []
+    if return_id is not None:
+        filters.append(LifecycleDecision.return_id == return_id)
+    if grade_id is not None:
+        filters.append(LifecycleDecision.grade_id == grade_id)
+
+    count_stmt = select(func.count(LifecycleDecision.id))
+    list_stmt = select(LifecycleDecision).order_by(LifecycleDecision.created_at.desc())
+    for f in filters:
+        count_stmt = count_stmt.where(f)
+        list_stmt = list_stmt.where(f)
+
+    total_result = await db.execute(count_stmt)
     total = total_result.scalar_one()
 
-    result = await db.execute(
-        select(LifecycleDecision)
-        .order_by(LifecycleDecision.created_at.desc())
-        .limit(limit)
-        .offset(offset)
-    )
+    result = await db.execute(list_stmt.limit(limit).offset(offset))
     items = result.scalars().all()
 
     return DecisionListResponse(items=list(items), total=total)
