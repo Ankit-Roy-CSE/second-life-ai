@@ -25,8 +25,16 @@ class ServiceClient:
     """
 
     def __init__(self):
-        """Initialize HTTP client."""
-        self.client = httpx.AsyncClient(timeout=30.0)
+        """Initialize HTTP client with explicit timeout configuration."""
+        # Set explicit timeouts to prevent hanging requests
+        # connect: 5s, read: 30s, write: 10s, pool: 5s
+        timeout = httpx.Timeout(
+            connect=5.0,
+            read=30.0,
+            write=10.0,
+            pool=5.0,
+        )
+        self.client = httpx.AsyncClient(timeout=timeout)
 
     async def close(self):
         """Close the HTTP client."""

@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,18 +125,30 @@ async def create_return(
     await db.flush()
     await db.refresh(return_entity)
 
-    # Emit ReturnSubmitted event
-    await publish(
-        event_type="ReturnSubmitted",
-        correlation_id=return_entity.id,
-        data={
-            "return_id": return_entity.id,
-            "product_id": return_entity.product_id,
-            "user_id": return_entity.user_id,
-            "reason": return_entity.reason,
-            "media": return_entity.media,
-        },
-    )
+    # Emit ReturnSubmitted event (critical for saga)
+    try:
+        await publish(
+            event_type="ReturnSubmitted",
+            correlation_id=return_entity.id,
+            data={
+                "return_id": return_entity.id,
+                "product_id": return_entity.product_id,
+                "user_id": return_entity.user_id,
+                "reason": return_entity.reason,
+                "media": return_entity.media,
+            },
+        )
+    except Exception as e:
+        # If event publish fails, rollback the transaction
+        # The saga cannot start without the event
+        await db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail=f"Failed to publish ReturnSubmitted event: {e}",
+        ) from e
+
+    # Commit transaction only after successful event publish
+    await db.commit()
 
     # Return response
     return ReturnResponse(
@@ -188,15 +200,16 @@ async def list_returns(
     if status_filter:
         query = query.where(Return.status == status_filter)
 
-    # Get total count
-    count_query = select(Return)
+    # Get total count efficiently using COUNT(*)
+    from sqlalchemy import func
+    count_query = select(func.count()).select_from(Return)
     if user_id_filter:
         count_query = count_query.where(Return.user_id == user_id_filter)
     if status_filter:
         count_query = count_query.where(Return.status == status_filter)
     
     total_result = await db.execute(count_query)
-    total = len(total_result.scalars().all())
+    total = total_result.scalar()
 
     # Apply pagination
     query = query.limit(limit).offset(offset).order_by(Return.created_at.desc())
@@ -262,8 +275,6 @@ async def get_return_detail(
     return_entity = result.scalar_one_or_none()
 
     if not return_entity:
-        from fastapi import HTTPException
-
         raise HTTPException(status_code=404, detail=f"Return {return_id} not found")
 
     # Build return response
@@ -277,8 +288,8 @@ async def get_return_detail(
         created_at=return_entity.created_at.isoformat(),
     )
 
-    # TODO: Aggregate data from other services (P2+)
-    # For now, only return the Return entity
+    # Full BFF aggregation will be implemented in P2
+    # For P1, only return the Return entity
     return ReturnDetailResponse(
         return_data=return_response,
         grade=None,

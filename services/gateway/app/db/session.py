@@ -9,12 +9,11 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-# Gateway has its own database for the Return table
-DATABASE_URL = "postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_gateway"
+from app.config import settings
 
-# Create async engine
+# Create async engine from settings
 engine = create_async_engine(
-    DATABASE_URL,
+    settings.database_url,
     echo=False,
     future=True,
 )
