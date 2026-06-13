@@ -11,10 +11,10 @@ COPY services/lifecycle/pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir -e .
 
 COPY services/lifecycle/app ./app
-
-# COPY services/lifecycle/alembic ./alembic
-# COPY services/lifecycle/alembic.ini ./alembic.ini
+COPY services/lifecycle/alembic ./alembic
+COPY services/lifecycle/alembic.ini ./alembic.ini
 
 EXPOSE 8003
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003"]
+# Run migrations then start the service
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8003"]

@@ -7,6 +7,8 @@ class Settings(BaseServiceSettings):
 
     service_name: str = "grading"
     database_url: str = "postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_grading"
+
+    # MinIO for reading product media
     s3_endpoint_url: str = "http://minio:9000"
     s3_access_key: str = "minioadmin"
     s3_secret_key: str = "minioadmin"
