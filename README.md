@@ -12,7 +12,7 @@ An event-driven microservices platform that decides the best, most sustainable "
 
 - Docker + Docker Compose
 - Python 3.12 + [uv](https://docs.astral.sh/uv/) or pip
-- Node 20 + pnpm (`npm i -g pnpm`)
+- Node 20 + npm (bundled with Node)
 
 ### 1. Configure environment
 
@@ -33,8 +33,8 @@ This starts Postgres (6 DBs), Redis, MinIO, and all 7 backend services.
 
 ```bash
 cd apps/web
-pnpm install
-pnpm dev
+npm install
+npm run dev
 # → http://localhost:3000
 ```
 
@@ -96,8 +96,8 @@ ruff check . && black --check .
 
 ```bash
 cd apps/web
-pnpm dev
-pnpm lint && pnpm build
+npm run dev
+npm run lint && npm run build
 ```
 
 ### Local Testing
