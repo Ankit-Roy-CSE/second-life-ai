@@ -27,10 +27,10 @@
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 8 | 0 | 0 | 3 |
-| Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
+| Phase 1 — Core | 7 | 1 | 0 | 0 | 6 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **8** | **0** | **0** | **26** |
+| **Total** | **34** | **12** | **0** | **0** | **22** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -52,7 +52,7 @@
 | P0-C2 | C | Primitives batch 1 + AppShell/NavBar | ✅ Done | Button, Card, Badge, Input, Label, Skeleton, AppShell created | c/web/p0-c2 |
 | P0-C3 | C | Frontend mock layer + typed API client | ✅ Done | api-client.ts created with mock approach using generated types | c/web/p0-c3 |
 
-**Checkpoint CP0:** ⬜ Not verified — _infra boots; seed loads; shell+tokens render vs mocks; events round-trip + DLQ; enums + REST contracts in both stacks._
+**Checkpoint CP0:** ✅ Verified — _infra boots; seed loads; shell+tokens render vs mocks; events round-trip + DLQ; enums + REST contracts in both stacks._
 
 ---
 
@@ -62,7 +62,7 @@
 |---------|-------|------|--------|-------|------|
 | P1-A1 | A | User Service (auth/JWT, profile, credits) | 📋 Not started | — | — |
 | P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | 📋 Not started | — | — |
-| P1-B1 | B | AI Grading Service (`ProductGraded`) | 📋 Not started | — | — |
+| P1-B1 | B | AI Grading Service (`ProductGraded`) | ✅ Done | Consumes `ReturnSubmitted` → `ai_client.grade_product()` → persist Grade → emit `ProductGraded`; `GET /grades/{return_id}` + `GET /grades`; SQLAlchemy Grade model + Alembic migration (001_create_grades_table); idempotent handler (skips re-grading); lifespan wires DB + event consumer; 10 tests (domain idempotency, all grades storable, route 200/404, list endpoint) | b/grading/p1-b1 |
 | P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | 📋 Not started | — | — |
 | P1-C1 | C | Auth UI + API client JWT | 📋 Not started | — | — |
 | P1-C2 | C | Return submission + grade view | 📋 Not started | — | — |
@@ -112,8 +112,8 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 
 | # | Event | Producer | Consumer(s) | Status |
 |---|-------|----------|-------------|--------|
-| 1 | `ReturnSubmitted` | gateway | grading | 📋 |
-| 2 | `ProductGraded` | grading | lifecycle, passport | 📋 |
+| 1 | `ReturnSubmitted` | gateway | grading | ✅ |
+| 2 | `ProductGraded` | grading | lifecycle, passport | ✅ |
 | 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | 📋 |
 | 4 | `PassportCreated` | passport | matching | 📋 |
 | 5 | `HyperlocalMatchRequested` | passport | matching | 📋 |
@@ -131,7 +131,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 |---------|-------|----------|---------------|-----------|--------|-------|--------|
 | gateway | A | 📋 | n/a | 📋 | 📋 | 📋 | 📋 |
 | user | A | 📋 | 📋 | 📋 | n/a | 📋 | 📋 |
-| grading | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
+| grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | lifecycle | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | matching | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
