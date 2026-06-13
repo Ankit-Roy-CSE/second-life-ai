@@ -45,7 +45,7 @@ for in a sustainability ledger.
 | Object storage | MinIO (S3-compatible) | Product images/videos |
 | AI | AWS Bedrock (reasoning/summaries) + Rekognition (vision)| Behind shared `ai` wrapper + mock |
 | Auth | JWT (python-jose), passlib[bcrypt] | Issued by User Service |
-| Packaging / dev | Docker, Docker Compose, uv/pip, pnpm | Local-first |
+| Packaging / dev | Docker, Docker Compose, uv/pip, npm | Local-first |
 | Quality | ruff + black (Py), eslint + prettier (TS), pytest/vitest| See code-standards.md |
 
 >**Version pins live in [library-docs.md](library-docs.md).** Do not introduce a library
@@ -61,7 +61,7 @@ with its own database, Dockerfile, and port. **Owner** indicates the responsible
 
 | Service | Owner | Port | Database | Responsibility |
 |---------|-------|------|----------|----------------|
-| **API Gateway / BFF** (`gateway`) | A | 8000 | _none_ | Single entry point for the frontend; routes/aggregates calls to services; verifies JWTs; exposes a read-model for dashboards. |
+| **API Gateway / BFF** (`gateway`) | A | 8000 | `slmai_gateway` | Single entry point for the frontend; routes/aggregates calls to services; verifies JWTs; owns Return entity; exposes a read-model for dashboards. |
 | **User Service** (`user`) | A | 8001 | `slmai_user` | Auth (register/login/JWT), user profile, preferences, green-credit balance. |
 | **AI Grading Service** (`grading`) | B | 8002 | `slmai_grading` | Analyze images/video + return reason → condition grade, confidence, damage summary. Emits `ProductGraded`. |
 | **Lifecycle Decision Service** (`lifecycle`) | B | 8003 | `slmai_lifecycle` | Decide next action (Resell / Refurbish / Donate / Recycle / Hyperlocal) + value-recovery estimate. Emits `LifecycleDecisionCreated`. |
@@ -369,7 +369,7 @@ apps/web/
 
 | Environment | What runs where |
 |-------------|-----------------|
-| **Local (primary)** | `docker compose up` → Postgres, Redis, MinIO, all 7 backend services. Web runs `pnpm dev` (or in compose). `AI_MODE=mock` by default. |
+| **Local (primary)** | `docker compose up` → Postgres, Redis, MinIO, all 7 backend services. Web runs `npm run dev` (or in compose). `AI_MODE=mock` by default. |
 | **Demo** | Frontend on **Vercel** (`apps/web`), pointing at the Gateway URL via `NEXT_PUBLIC_API_BASE_URL`. Backend stays local (tunnel) or on a single cloud VM. `AI_MODE=aws` or `hybrid` if AWS keys are present. |
 | **AI** | AWS Bedrock + Rekognition reached directly from `grading`/`lifecycle`/`matching` via the shared wrapper. Optional; mock covers the demo if keys are absent. |
 

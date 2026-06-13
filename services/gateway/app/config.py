@@ -7,6 +7,9 @@ class Settings(BaseServiceSettings):
 
     service_name: str = "gateway"
 
+    # Database (Gateway owns Return table)
+    database_url: str = "postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_gateway"
+
     # JWT — gateway verifies tokens issued by user service
     jwt_secret: str = "change-me-in-production-use-a-long-random-string"
     jwt_algorithm: str = "HS256"

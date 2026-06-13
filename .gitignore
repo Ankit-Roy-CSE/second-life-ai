@@ -30,11 +30,11 @@ htmlcov/
 *.pem
 *.key
 
-# === Node / pnpm ===
+# === Node / npm ===
 node_modules/
 .next/
 out/
-.pnpm-store/
+# No pnpm store needed
 .turbo/
 
 # === Docker ===

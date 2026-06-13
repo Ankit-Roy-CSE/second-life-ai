@@ -77,12 +77,12 @@ graph LR
 | **P0-B1** | B | shared-py AI wrapper (mock) | `ai` package: typed `analyze_media/summarize_damage/decide_lifecycle/match_rationale` + convenience `grade_product`; deterministic **mock mode** (seeded from media key hash, golden-path constant `GOLDEN_PATH_MEDIA_KEY`); `AI_MODE` + `BEDROCK_MODEL_ID` env config; prompt scaffolding in `ai/prompts/`; `correlation_id` in all structured logs | P0-A3 |
 | **P0-B2** | B | Minimal seed/fixtures | `scripts/seed_min.py`: demo users (location + interests), products, a couple of sample returns — usable by **B** (AI tuning) and **C** (real UIs) from Phase 0 | P0-A2, P0-A5 |
 | **P0-B3** | B | Event-saga observability | `scripts/events_tail.py` (tail `slmai:events` + DLQ), Gateway `/debug/events` read view (added in coordination with **A**, the gateway owner), manual event **trigger/replay** helper | P0-A4 |
-| **P0-C1** | C | Web scaffold + tokens + IA | Next.js 14 (App Router, TS, pnpm) + Tailwind; `globals.css` CSS vars + `tailwind.config.ts` from [ui-tokens.md](ui-tokens.md); Inter via `next/font`; **route map / IA**: `/login`, `/returns`, `/returns/[id]`, `/passport/[id]`, `/matches`, `/marketplace`, `/sustainability` | P0-A1 |
+| **P0-C1** | C | Web scaffold + tokens + IA | Next.js 14 (App Router, TS, npm) + Tailwind; `globals.css` CSS vars + `tailwind.config.ts` from [ui-tokens.md](ui-tokens.md); Inter via `next/font`; **route map / IA**: `/login`, `/returns`, `/returns/[id]`, `/passport/[id]`, `/matches`, `/marketplace`, `/sustainability` | P0-A1 |
 | **P0-C2** | C | Primitives batch 1 + shell | `cn()`, QueryClient provider, `AppShell`/`NavBar`, primitives: Button, Card, Badge, Input, Label, Skeleton → register in [ui-registry.md](ui-registry.md) | P0-C1 |
 | **P0-C3** | C | Frontend mock layer + API client | typed Gateway API client + Zod response schemas mirroring `P0-A5`; **mock layer** (MSW or static fixtures) so UI builds before endpoints land | P0-C1, P0-A5 |
 
 >**✅ Checkpoint CP0:** `docker compose up` starts infra + a sample service `/health` returns
-> 200; `seed_min` loads; `pnpm dev` renders the shell (tokens) against the mock layer. Enums +
+> 200; `seed_min` loads; `npm run dev` renders the shell (tokens) against the mock layer. Enums +
 > REST contracts exist in both stacks. Event publish/subscribe round-trips a test message, and a
 > repeatedly-failing handler lands in the DLQ.
 

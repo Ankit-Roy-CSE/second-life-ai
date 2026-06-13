@@ -191,7 +191,7 @@ Each entry has: **Purpose · Version · Where used · Usage rules · Gotchas**. 
 | clsx | `2.1.*` | recharts | `2.12.*` |
 | tailwind-merge | `2.5.*` | axios | `1.7.*` |
 
-> Package manager: **pnpm**. Node **20 LTS**. shadcn/ui components are generated into
+> Package manager: **npm**. Node **20 LTS**. shadcn/ui components are generated into
 > `components/ui` (not a versioned dependency).
 
 ---
@@ -327,9 +327,9 @@ Each entry has: **Purpose · Version · Where used · Usage rules · Gotchas**. 
 -**Gotchas:** Set `endpoint_url` + path-style addressing for MinIO. Same code points at real
  S3 by swapping env.
 
-### pnpm
+### npm
 
--**Usage rules:** Frontend package manager. Commit `pnpm-lock.yaml`. 🚫 Don't mix npm/yarn
+-**Usage rules:** Frontend package manager. Commit `package-lock.json`. 🚫 Don't mix pnpm/yarn
  lockfiles.
 
 ---

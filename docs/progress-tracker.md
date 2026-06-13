@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 8 | 0 | 0 | 3 |
-| Phase 1 — Core | 7 | 2 | 0 | 0 | 5 |
+| Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
+| Phase 1 — Core | 7 | 4 | 0 | 0 | 3 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **13** | **0** | **0** | **21** |
+| **Total** | **34** | **15** | **0** | **0** | **19** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -60,8 +60,8 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-| P1-A1 | A | User Service (auth/JWT, profile, credits) | 📋 Not started | — | — |
-| P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | 📋 Not started | — | — |
+| P1-A1 | A | User Service (auth/JWT, profile, credits) | ✅ Done | Complete User Service with auth, profile, and cross-service endpoints. Includes: SQLAlchemy User model, Pydantic schemas (RegisterRequest, LoginRequest, UserResponse, etc.), async session management, UserRepository (CRUD), UserService (business logic with bcrypt password hashing, JWT issuance, Haversine distance for candidate matching), FastAPI routes (POST /auth/register, POST /auth/login, GET/PATCH /users/{id}, GET /users/{id}/credits, GET /users/candidates), Alembic migration for users table, tests (test_auth.py + test_users.py with 10 test cases). All 6 endpoints per SERVICE_ENDPOINTS.md contract. | a/user/p1-a1 |
+| P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | ✅ Done | Complete Gateway Service with auth proxy, return management, and event emission. Includes: Return ORM model (Gateway owns Return table), Pydantic schemas (ReturnCreateRequest, ReturnResponse, ReturnListResponse, ReturnDetailResponse), async session management, JWT verification middleware (get_current_user_id), HTTP client for User Service proxy, MinIO client for media uploads, FastAPI routes (POST /auth/register → User:8001, POST /auth/login → User:8001, POST /returns with ReturnSubmitted event emission, GET /returns paginated list, GET /returns/{id} BFF aggregation stub), CORS for frontend, tests (test_auth_proxy.py + test_returns.py with 9 test cases), README documentation. All endpoints per SERVICE_ENDPOINTS.md. Ready for frontend integration. | a/gateway/p1-a2 |
 | P1-B1 | B | AI Grading Service (`ProductGraded`) | ✅ Done | Consumes `ReturnSubmitted` → `ai_client.grade_product()` → persist Grade → emit `ProductGraded`; `GET /grades/{return_id}` + `GET /grades`; SQLAlchemy Grade model + Alembic migration (001_create_grades_table); idempotent handler (skips re-grading); lifespan wires DB + event consumer; 10 tests (domain idempotency, all grades storable, route 200/404, list endpoint) | b/grading/p1-b1 |
 | P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | ✅ Done | Consumes `ProductGraded` → `ai_client.decide_lifecycle()` → persist LifecycleDecision → emit `LifecycleDecisionCreated`; `GET /decisions/{return_id}` + `GET /decisions`; SQLAlchemy LifecycleDecision model + Alembic migration (001_create_lifecycle_decisions_table); idempotent handler (skips re-deciding); lifespan wires DB + event consumer; 9 tests (domain idempotency, all actions storable, route 200/404, list endpoint, event handler) | b/lifecycle/p1-b2 |
 | P1-C1 | C | Auth UI + API client JWT | 📋 Not started | — | — |
@@ -129,8 +129,8 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 
 | Service | Owner | Scaffold | DB/Migrations | Endpoints | Events | Tests | Status |
 |---------|-------|----------|---------------|-----------|--------|-------|--------|
-| gateway | A | 📋 | n/a | 📋 | 📋 | 📋 | 📋 |
-| user | A | 📋 | 📋 | 📋 | n/a | 📋 | 📋 |
+| gateway | A | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| user | A | ✅ | ✅ | ✅ | n/a | ✅ | ✅ |
 | grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | lifecycle | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |

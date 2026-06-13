@@ -1,48 +1,81 @@
-# Memory — Amazon Second Life AI — Phase 0 Complete (Member C)
+# Memory — Amazon Second Life AI — Session Restored (2026-06-14)
 
-Last updated: 2026-06-13 21:40:24
+Last updated: 2026-06-14
 
 ## What was built
 
-**Phase 0 COMPLETE for Member C** — all 3 frontend foundation tasks shipped successfully.
+Nothing new built this session — this was a context restoration session only.
 
-### P0-C1 — Web Scaffold + Tokens + IA
-- Scaffolded Next.js 14 App Router project at `apps/web` (using `pnpm` workspace).
-- Integrated Semantic UI tokens into `tailwind.config.ts` and `src/app/globals.css`.
-- Built Information Architecture (IA) routing stubs: `/login`, `/returns`, `/returns/[id]`, `/passport/[id]`, `/matches`, `/marketplace`, and `/sustainability`.
-
-### P0-C2 — Primitives Batch 1 + AppShell/NavBar
-- Built Primitives in `src/components/ui/`: `Button`, `Card`, `Badge`, `Input`, `Label`, `Skeleton`, and `Avatar`.
-- Built Layouts in `src/components/layout/`: `AppShell` and `NavBar` (with mock green credits and user profile menu).
-- Implemented `QueryClientProvider` via `src/components/providers.tsx` mapped at the root `layout.tsx`.
-- Ran `/imprint` to capture `Avatar` and `NavBar` pattern definitions into `docs/ui-registry.md`.
-
-### P0-C3 — Frontend Mock Layer + Typed API Client
-- Implemented `src/lib/api-client.ts` with `USE_MOCKS` default toggle.
-- Uses exact TypeScript definitions mapped by Member A (`apps/web/types/api.ts`).
+**Previous session (P1-A2 complete):**
+- Complete Gateway Service with auth proxy, return management, JWT verification, and event emission
+- Files created in services/gateway/: models.py, schemas.py, session.py, http_client.py, minio_client.py, routes.py, middleware.py, main.py, tests
+- All 5 Gateway endpoints implemented per SERVICE_ENDPOINTS.md
+- 9 test cases passing
 
 ## Decisions made
-- Next.js scaffolding uses `src/app` standard with `pnpm` workspaces.
-- Component tokens (`gold-700` and `--header-height`) injected cleanly into the `tailwind.config.ts` extension instead of using raw bracket heights/colors, adhering to the UI token system.
-- `NavBar` component isolated out of `AppShell` to enforce clear separation of concerns, carrying user context separately from page layout structural wrappers.
+
+All architectural decisions from previous sessions remain in place:
+1. Gateway owns Return table (architecture.md §5)
+2. No Alembic migrations for Gateway (minimal DB)
+3. Auth proxy pattern (no duplicate auth logic)
+4. JWT verification middleware (get_current_user_id)
+5. BFF aggregation stub (full implementation in P2)
+6. Media handled as URLs (MinIO client ready)
+7. CORS for frontend (localhost:3000, 3001)
 
 ## Problems solved
-- Scaffolding issues where `pnpm` execution `node_modules` store clashes resulted from nested directories were scrubbed and cleanly reinstalled.
-- Removed raw hex color drift (e.g. `border-[#CC7A00]`) resulting in strict mapping to Tailwind's extended color config.
+
+No new problems solved this session.
+
+Previous session solved:
+- Auth proxy with httpx AsyncClient
+- JWT verification middleware
+- Event emission after Return creation
+- Return ownership in Gateway DB
+- Test mocks for external dependencies
 
 ## Current state
-**Phase 0 — Member C: 3/3 tasks complete ✅**
 
-What works:
-- React Query (`QueryClientProvider`) wraps the Next.js shell successfully.
-- `api-client.ts` effectively provides typed responses to mock queries matching the exact python backend contract.
-- Primitives (`Button`, `Card`, etc.) map flawlessly to Amazon token styling via Tailwind CVA variants.
+**Phase 0:** 11/11 complete (all members)
+
+**Phase 1:** 2/7 complete
+- ✅ P1-A1 User Service — 6 endpoints, 10 tests
+- ✅ P1-A2 Gateway Service — 5 endpoints, 9 tests, auth proxy, ReturnSubmitted events
+- 📋 P1-B1 AI Grading Service — Next for Member B
+- 📋 P1-B2, P1-C1, P1-C2, P1-C3
+
+**Services ready:**
+- User Service (Member A) — fully operational
+- Gateway Service (Member A) — fully operational, ready for integration
+
+**Event saga:**
+- ReturnSubmitted event producer implemented and tested in Gateway
+
+**What's ready for integration:**
+- Frontend can call Gateway auth endpoints (P1-C1)
+- Frontend can call Gateway returns endpoints (P1-C2)
+- Grading Service can consume ReturnSubmitted events (P1-B1)
 
 ## Next session starts with
-**Member C can proceed to Phase 1: Authentication + Returns intake UIs.**
-- **P1-C1 (Auth UI + JWT Client):** Create `/login` and `/register` client-side views and connect to Auth Mock.
-- **P1-C2 (Returns Intake flow):** Build multi-step wizard for Product returns at `/returns`.
-- **P1-C3 (Returns Dashboard):** Connect the Returns API client endpoint to populate the `/returns/[id]` return status view.
+
+**For Member A (Full-Stack):**
+- Wait for Member B to complete P1-B1 (Grading) and P1-B2 (Lifecycle)
+- Then proceed with P2-A1 (Passport Service)
+- Alternative: Help test end-to-end integration (User + Gateway services)
+
+**For Member B (AI & Backend):**
+- **P1-B1 — AI Grading Service** (NOW UNBLOCKED)
+  - Consume ReturnSubmitted events from Gateway
+  - Call ai_client.grade_product() (P0-B1 complete)
+  - Create Grade entity in slmai_grading DB
+  - Emit ProductGraded event
+  - REST endpoint: GET /grades/{return_id}
+  - Tests (happy path + mock AI)
+
+**For Member C (Frontend):**
+- **P1-C1 — Auth UI** (NOW UNBLOCKED)
+  - Gateway auth endpoints ready at :8000
 
 ## Open questions
-None — Member C's Phase 0 tasks are completely verified and fully unblock frontend progression.
+
+None — all Phase 0 and P1-A1/P1-A2 complete and ready for next phase.
