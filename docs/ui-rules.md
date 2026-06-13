@@ -1,7 +1,7 @@
 # UI Rules — Amazon Second Life AI
 
 >**Concise, enforceable rules for building the UI.** Pair with [ui-tokens.md](ui-tokens.md)
-> (the values) and [ui-registry.md](ui-registry.md) (the components). If a rule here conflicts
+> (the values) , [ui-registry.md](ui-registry.md) (the components) and [design-files](design/*). If a rule here conflicts
 > with code, the rule wins — fix the code. Owner: Member C, but every agent touching the
 > frontend follows this.
 
