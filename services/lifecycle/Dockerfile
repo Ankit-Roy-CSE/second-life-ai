@@ -11,9 +11,8 @@ COPY services/lifecycle/pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir -e .
 
 COPY services/lifecycle/app ./app
-
-# COPY services/lifecycle/alembic ./alembic
-# COPY services/lifecycle/alembic.ini ./alembic.ini
+COPY services/lifecycle/alembic ./alembic
+COPY services/lifecycle/alembic.ini ./alembic.ini
 
 EXPOSE 8003
 

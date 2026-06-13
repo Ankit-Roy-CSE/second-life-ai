@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-13 · **Updated by:** C · **Latest:** P0-C1, P0-C2, P0-C3 complete — **Phase 0 done for Member A, B and C!**
+**Last updated:** 2026-06-14 · **Updated by:** B · **Latest:** P1-B2 complete — Lifecycle Decision Service done!
 
 ---
 
@@ -27,10 +27,10 @@
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 8 | 0 | 0 | 3 |
-| Phase 1 — Core | 7 | 1 | 0 | 0 | 6 |
+| Phase 1 — Core | 7 | 2 | 0 | 0 | 5 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **12** | **0** | **0** | **22** |
+| **Total** | **34** | **13** | **0** | **0** | **21** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -63,7 +63,7 @@
 | P1-A1 | A | User Service (auth/JWT, profile, credits) | 📋 Not started | — | — |
 | P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | 📋 Not started | — | — |
 | P1-B1 | B | AI Grading Service (`ProductGraded`) | ✅ Done | Consumes `ReturnSubmitted` → `ai_client.grade_product()` → persist Grade → emit `ProductGraded`; `GET /grades/{return_id}` + `GET /grades`; SQLAlchemy Grade model + Alembic migration (001_create_grades_table); idempotent handler (skips re-grading); lifespan wires DB + event consumer; 10 tests (domain idempotency, all grades storable, route 200/404, list endpoint) | b/grading/p1-b1 |
-| P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | 📋 Not started | — | — |
+| P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | ✅ Done | Consumes `ProductGraded` → `ai_client.decide_lifecycle()` → persist LifecycleDecision → emit `LifecycleDecisionCreated`; `GET /decisions/{return_id}` + `GET /decisions`; SQLAlchemy LifecycleDecision model + Alembic migration (001_create_lifecycle_decisions_table); idempotent handler (skips re-deciding); lifespan wires DB + event consumer; 9 tests (domain idempotency, all actions storable, route 200/404, list endpoint, event handler) | b/lifecycle/p1-b2 |
 | P1-C1 | C | Auth UI + API client JWT | 📋 Not started | — | — |
 | P1-C2 | C | Return submission + grade view | 📋 Not started | — | — |
 | P1-C3 | C | Primitives batch 2 + Empty/Error/PageHeader | 📋 Not started | — | — |
@@ -114,7 +114,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 |---|-------|----------|-------------|--------|
 | 1 | `ReturnSubmitted` | gateway | grading | ✅ |
 | 2 | `ProductGraded` | grading | lifecycle, passport | ✅ |
-| 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | 📋 |
+| 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | ✅ |
 | 4 | `PassportCreated` | passport | matching | 📋 |
 | 5 | `HyperlocalMatchRequested` | passport | matching | 📋 |
 | 6 | `MatchFound` | matching | sustainability, passport | 📋 |
@@ -132,7 +132,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | gateway | A | 📋 | n/a | 📋 | 📋 | 📋 | 📋 |
 | user | A | 📋 | 📋 | 📋 | n/a | 📋 | 📋 |
 | grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| lifecycle | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
+| lifecycle | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | matching | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | sustainability | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |

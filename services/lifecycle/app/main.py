@@ -1,10 +1,73 @@
 """
 Lifecycle Decision Service — entry point.
-Full implementation in P1-B2.
+
+Consumes ProductGraded → runs AI lifecycle decision → emits LifecycleDecisionCreated.
 """
 
-from shared_py.web import create_app
+import asyncio
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from shared_py.events.handlers import start_consumer, stop_consumer
+from shared_py.web import create_app, add_ready_check
 
 from app.config import settings
+from app.api.routes import router as decisions_router
+from app.db.session import close_db, init_db
 
-app = create_app(service_name=settings.service_name)
+# Register event handlers by importing the module (side effect: @subscribe decorators run)
+import app.events.handlers  # noqa: F401
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """Service startup and shutdown."""
+    # ── Startup ──────────────────────────────────────────────────────────────
+    # Init DB
+    init_db(settings.database_url)
+
+    # Add /ready check (verifies DB + Redis reachable)
+    add_ready_check(
+        name="postgres",
+        checker=_check_postgres,
+    )
+
+    # Start event consumer in background
+    consumer_task = asyncio.create_task(
+        start_consumer(redis_url=settings.redis_url, group="lifecycle")
+    )
+
+    yield
+
+    # ── Shutdown ─────────────────────────────────────────────────────────────
+    await stop_consumer()
+    consumer_task.cancel()
+    try:
+        await consumer_task
+    except asyncio.CancelledError:
+        pass
+    await close_db()
+
+
+async def _check_postgres() -> bool:
+    """Readiness check: can we reach the DB?"""
+    from sqlalchemy import text
+    from app.db.session import _engine
+
+    if _engine is None:
+        return False
+    try:
+        async with _engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False
+
+
+app = create_app(
+    service_name=settings.service_name,
+    lifespan=lifespan,
+)
+
+app.include_router(decisions_router)
