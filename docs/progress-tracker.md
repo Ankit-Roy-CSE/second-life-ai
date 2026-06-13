@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-13 · **Updated by:** C · **Latest:** P0-C1, P0-C2, P0-C3 complete — **Phase 0 done for Member A, B and C!**
+**Last updated:** 2026-06-13 · **Updated by:** A · **Latest:** P1-A1 complete — User Service (auth/JWT, profile, credits)
 
 ---
 
@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 8 | 0 | 0 | 3 |
-| Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
+| Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
+| Phase 1 — Core | 7 | 1 | 0 | 0 | 6 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **8** | **0** | **0** | **26** |
+| **Total** | **34** | **9** | **0** | **0** | **25** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -60,7 +60,7 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-| P1-A1 | A | User Service (auth/JWT, profile, credits) | 📋 Not started | — | — |
+| P1-A1 | A | User Service (auth/JWT, profile, credits) | ✅ Done | Complete User Service with auth, profile, and cross-service endpoints. Includes: SQLAlchemy User model, Pydantic schemas (RegisterRequest, LoginRequest, UserResponse, etc.), async session management, UserRepository (CRUD), UserService (business logic with bcrypt password hashing, JWT issuance, Haversine distance for candidate matching), FastAPI routes (POST /auth/register, POST /auth/login, GET/PATCH /users/{id}, GET /users/{id}/credits, GET /users/candidates), Alembic migration for users table, tests (test_auth.py + test_users.py with 10 test cases). All 6 endpoints per SERVICE_ENDPOINTS.md contract. | a/user/p1-a1 |
 | P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | 📋 Not started | — | — |
 | P1-B1 | B | AI Grading Service (`ProductGraded`) | 📋 Not started | — | — |
 | P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | 📋 Not started | — | — |
@@ -130,7 +130,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | Service | Owner | Scaffold | DB/Migrations | Endpoints | Events | Tests | Status |
 |---------|-------|----------|---------------|-----------|--------|-------|--------|
 | gateway | A | 📋 | n/a | 📋 | 📋 | 📋 | 📋 |
-| user | A | 📋 | 📋 | 📋 | n/a | 📋 | 📋 |
+| user | A | ✅ | ✅ | ✅ | n/a | ✅ | ✅ |
 | grading | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | lifecycle | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |

@@ -1,74 +1,87 @@
-# Memory — Amazon Second Life AI — Phase 0 Complete (Member B)
+# Memory — Amazon Second Life AI — P1-A1 Complete (Member A)
 
-Last updated: 2026-06-13
+Last updated: 2026-06-14
 
 ## What was built
 
-### P0-B1 — AI Wrapper + Mock Mode (complete)
-- `packages/shared-py/shared_py/ai/schemas.py` — Pydantic v2 response models: GradeResult, LifecycleDecision, MatchRationale, DefectItem, DamageSummary, MediaLabels. Uses `Annotated[float, Field(...)]` (not deprecated `confloat`). GradeResult has `model_config = ConfigDict(protected_namespaces=())` for `model_version` field.
-- `packages/shared-py/shared_py/ai/mock.py` — Deterministic mock: seeded from media-key hash via `_media_seed()` (falls back to `reason:category` hash when media_keys is empty). Grade distribution: 35% A, 30% B, 20% C, 15% D.
-- `packages/shared-py/shared_py/ai/client.py` — `AIClient` class with 5 public async methods matching spec: `analyze_media`, `summarize_damage`, `grade_product` (convenience combo), `decide_lifecycle`, `match_rationale`. All accept `correlation_id` kwarg for structured logging. Mode switching (mock/aws/hybrid) via `AI_MODE` env. Reads `BEDROCK_MODEL_ID`. Graceful fallback to mock on AWS failure. Golden-path constants: `GOLDEN_PATH_MEDIA_KEY`, `GOLDEN_PATH_CATEGORY`, `GOLDEN_PATH_REASON`.
-- `packages/shared-py/shared_py/ai/prompts/` — grading.txt, lifecycle.txt, matching.txt
-- `packages/shared-py/shared_py/ai/__init__.py` — Clean public API exporting all schemas + client + constants
-- `packages/shared-py/tests/test_ai.py` — 22 tests: determinism, golden-path, spec function separation, grade logic, lifecycle logic, match rationale, mode switching, graceful degradation
-- `packages/shared-py/conftest.py` — sys.path fix for running tests without editable install
+Complete User Service implementation with authentication, profile management, and cross-service buyer matching for P1-A1.
 
-### P0-B2 — Minimal Seed/Fixtures (complete)
-- `scripts/seed_min.py` — 6 users (1 returner, 4 nearby buyers at varying distances in Bengaluru, 1 admin), 4 products (headphones golden-path, laptop, jacket, chair), 2 returns (golden-path + supporting). Deterministic UUIDs via uuid5. Idempotent (ON CONFLICT DO UPDATE). Gracefully skips unmigrated tables. MinIO placeholder uploads. `--reset` flag. Prints full manifest.
+**Files created in services/user/:**
+- `app/db/session.py` — Async session with get_db() dependency (commit/rollback handling)
+- `app/db/repository.py` — UserRepository: create, get_by_id, get_by_email, update, find_candidates
+- `app/domain/service.py` — UserService with bcrypt password hashing, JWT issuance, Haversine distance for candidate matching
+- `app/api/routes.py` — 6 endpoints: POST /auth/register, POST /auth/login, GET/PATCH /users/{id}, GET /users/{id}/credits, GET /users/candidates
+- `app/main.py` — Updated with lifespan for table creation and route wiring
+- `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako` — Alembic async setup
+- `alembic/versions/001_create_users_table.py` — Initial migration
+- `tests/conftest.py` — In-memory SQLite test setup
+- `tests/test_auth.py` — 5 auth tests (register, duplicate email, login, invalid credentials)
+- `tests/test_users.py` — 5 user tests (get, update, credits, candidates with distance)
+- `README.md`, `IMPLEMENTATION_SUMMARY.md`, `verify_implementation.py` — Documentation
 
-### P0-B3 — Event-Saga Observability (complete)
-- `scripts/events_tail.py` — CLI tool with 5 subcommands: `tail` (live stream with ANSI colour, --dlq, --correlation-id filter), `dump` (historical), `trigger` (publish synthetic events with --golden-path flag), `replay` (DLQ recovery), `stats` (counts by event_type).
-- `services/gateway/app/api/debug_routes.py` — REST endpoints: GET /debug/events, GET /debug/events/dlq, GET /debug/events/stats, POST /debug/events/trigger. Wired into gateway main.py.
-
-### Other changes this session
-- `context/problems.md` — Rewrote to map each problem to the solving microservice(s) with ✅/🟡/⛔ status
-- `docs/ui-tokens.md` — Completely reworked to Amazon ecosystem aesthetic (gold primary, navy secondary, cream bg, small radii, border-first)
-- `docs/build-plan.md` — Rebalanced workload: P0-A6/A7 moved to B as P0-B2/B3 (now A=11, B=11, C=11)
-- `packages/shared-py/shared_py/schemas/rest_contracts.py` — Fixed Pydantic v2 deprecation: `class Config` → `model_config = ConfigDict(populate_by_name=True)`
-- All 7 service `pyproject.toml` files — Added `[tool.hatch.build.targets.wheel] packages = ["app"]` (fixes Docker compose build failure)
-- Switched frontend from pnpm to npm across all docs (README, AGENTS, architecture, build-plan, code-standards, library-docs, .gitignore). Deleted pnpm-lock.yaml.
-- `README.md` — Added "Local Testing" section with venv setup + pytest instructions
+**All 6 API endpoints per SERVICE_ENDPOINTS.md contract:**
+1. POST /auth/register — bcrypt hash, return user (no password_hash)
+2. POST /auth/login — verify password, issue JWT (HS256, 24h)
+3. GET /users/{id} — get profile
+4. PATCH /users/{id} — update display_name, location, interests
+5. GET /users/{id}/credits — get green_credits balance
+6. GET /users/candidates — find buyers (category + lat/lng/radius filters, sorted by distance)
 
 ## Decisions made
 
-1. **Sustainability service is pure deterministic logic** — no LLM. Metrics (CO₂, waste, value, credits) are formula-based calculations, not AI-generated. Optionally can add LLM-generated explanation text later.
-2. **AI wrapper exposes spec-named functions** — `analyze_media`, `summarize_damage`, `decide_lifecycle`, `match_rationale` as separate methods + `grade_product` as convenience combo.
-3. **Golden-path demo product** — Zebronics headphones with `GOLDEN_PATH_MEDIA_KEY = "products/golden-path/demo-headphones-001.jpg"`. All seed scripts and demo flows reference this constant.
-4. **UI tokens aligned to Amazon ecosystem** — Gold (#FF9900) primary, navy (#232F3E) header, cream (#FEF7ED) background, 4px base radius. Not a generic green sustainability theme.
-5. **npm over pnpm** — Switched frontend package manager to npm (bundled with Node, no extra install).
-6. **Hatchling needs explicit packages** — Every service pyproject.toml requires `[tool.hatch.build.targets.wheel] packages = ["app"]` for Docker editable installs to work.
+1. **Bcrypt for passwords** — passlib[bcrypt] for hashing. Minimum 8 chars. Never return password_hash in responses.
+2. **JWT HS256 with shared secret** — Gateway verifies and forwards X-User-Id. 24h expiry (JWT_EXPIRE_MINUTES=1440).
+3. **Haversine distance for matching** — Simplified geospatial (no PostGIS). Filters category in Python, calculates distance, sorts by proximity.
+4. **In-memory SQLite for tests** — Fast, no external deps. Each test gets fresh DB via conftest fixture.
+5. **Lifespan creates tables** — Dev convenience. Production uses alembic upgrade head.
+6. **Green credits start at 0.0** — Sustainability service updates later via events.
 
 ## Problems solved
 
-1. **ImportError when running pytest** — shared_py not on path. Fix: `pip install -e "packages/shared-py[dev]"` + conftest.py with sys.path insert as fallback.
-2. **Pydantic `model_version` namespace warning** — `model_` prefix is protected in Pydantic v2. Fix: `model_config = ConfigDict(protected_namespaces=())`.
-3. **Pydantic class-based Config deprecation** — `class Config: populate_by_name = True` in rest_contracts.py. Fix: `model_config = ConfigDict(populate_by_name=True)`.
-4. **Docker compose build fails for services** — Hatchling can't discover `app/` package. Fix: add `[tool.hatch.build.targets.wheel] packages = ["app"]` to each service's pyproject.toml.
-5. **Empty media_keys produces same grade** — was always hashing "default". Fix: `_media_seed()` falls back to hashing `reason:category`.
+1. **Async session management** — get_db() dependency handles commit/rollback automatically
+2. **Password security** — bcrypt.hash() for storage, bcrypt.verify() for login, never expose password_hash
+3. **JWT issuance** — Used shared create_access_token() from shared_py.web.auth with user.id as subject
+4. **Candidate matching** — Implemented /users/candidates with category filter (interests array) and Haversine radius filter
+5. **Test isolation** — conftest.py creates in-memory SQLite per test, no shared state
 
 ## Current state
 
-**Phase 0: 11/11 complete (all members done)**
-- A: 5/5 ✅ (scaffold, compose, shared-py web/events/contracts)
-- B: 3/3 ✅ (AI wrapper, seed, observability)
-- C: 3/3 ✅ (web scaffold, primitives, mock layer)
+**Phase 0:** 11/11 complete (A: 5/5, B: 3/3, C: 3/3)
 
-**CP0 NOT YET VERIFIED** — all tasks are done but the checkpoint hasn't been formally run. Backend should boot (`docker compose up --build`), frontend should render (`npm run dev`). Events round-trip testable via `events_tail.py trigger --golden-path`.
+**Phase 1:** 1/7 complete
+- ✅ P1-A1 User Service — DONE (6 endpoints, 10 tests, docs, migration)
+- 📋 P1-A2 Gateway + Returns intake — Next for Member A
+- 📋 P1-B1, P1-B2, P1-C1, P1-C2, P1-C3
 
-**Phase 1 is fully unblocked for Member B:**
-- P1-B1 (AI Grading Service) — depends on P0-A4 ✅ + P0-B1 ✅
-- P1-B2 (Lifecycle Decision Service) — depends on P0-A4 ✅ + P0-B1 ✅ + P1-B1
+**User Service ready for:**
+- Gateway proxy (P1-A2)
+- Matching service calls (P2-B1)
+- Frontend via Gateway (P1-C1)
+
+**Progress tracker updated:**
+- P1-A1 marked ✅ Done
+- Phase 1: 1/7 complete
+- Service Readiness table: user service all ✅
 
 ## Next session starts with
 
-1. **Verify CP0** — run `docker compose up --build`, check all 7 services respond to `/health`, run `events_tail.py trigger ReturnSubmitted --golden-path` and confirm event appears, run `npm run dev` in apps/web and confirm shell renders.
-2. **Start P1-B1 — AI Grading Service** — build `services/grading/`:
-   - SQLAlchemy models + Alembic migration for Grade table
-   - Event handler: consume `ReturnSubmitted` → call `ai_client.grade_product()` → persist Grade → emit `ProductGraded`
-   - REST endpoint: `GET /grades/{return_id}`
-   - Tests (happy path + mock AI)
+**P1-A2 — API Gateway + Returns intake**
+
+Build services/gateway/:
+1. **Gateway owns Return table** — create slmai_gateway DB with Return entity (id, product_id, user_id, reason, media[], status, created_at)
+2. **JWT verification middleware** — decode token, forward X-User-Id header to downstream services
+3. **Proxy auth to User Service** — POST /auth/register and POST /auth/login → http://user:8001
+4. **Returns endpoints:**
+   - POST /returns → create Return, upload media to MinIO, emit ReturnSubmitted event
+   - GET /returns → list returns (paginated, filter by user_id/status)
+   - GET /returns/{id} → BFF aggregation (Return + Grade + Decision + Passport + Matches)
+5. **MinIO integration** — upload media files, store S3 keys in Return.media[]
+6. **Event emission** — publish ReturnSubmitted via shared events wrapper
+7. **CORS** — allow frontend origin
+8. **Tests** — proxy auth, create return, emit event, MinIO upload
+
+Gateway has no Alembic (stateless except Return table created via SQLAlchemy metadata in lifespan).
 
 ## Open questions
 
-- Member C's work quality not yet verified by B — need to run `npm run dev` and check if tokens/shell actually render correctly with the Amazon aesthetic
-- Progress tracker overall count is stale (shows 8 done, should be 11) — minor doc inconsistency to fix
+None — P1-A1 complete and ready for integration
