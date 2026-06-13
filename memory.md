@@ -1,137 +1,48 @@
-# Memory — Amazon Second Life AI — Phase 0 Complete (Member A)
+# Memory — Amazon Second Life AI — Phase 0 Complete (Member C)
 
-Last updated: 2026-06-13
+Last updated: 2026-06-13 21:40:24
 
 ## What was built
 
-**Phase 0 COMPLETE for Member A** — all 5 foundation tasks shipped successfully.
+**Phase 0 COMPLETE for Member C** — all 3 frontend foundation tasks shipped successfully.
 
-### P0-A4 — shared-py/events wrapper (completed this session)
-- `shared_py/events/schemas.py` — EventEnvelope + 10 event payload models with Pydantic validation, EVENT_TYPE_TO_MODEL registry
-- `shared_py/events/client.py` — Redis async client singleton, publish() with envelope construction and validation
-- `shared_py/events/handlers.py` — @subscribe() decorator, start_consumer()/stop_consumer(), XREADGROUP consumer loop, idempotency cache (event_id dedupe), retry logic with DLQ routing to `slmai:events:dlq` after MAX_RETRIES (3)
-- `shared_py/events/__init__.py` — clean public API
-- `tests/test_events.py` — 12 comprehensive tests covering publish, subscribe, idempotency, retry, DLQ
+### P0-C1 — Web Scaffold + Tokens + IA
+- Scaffolded Next.js 14 App Router project at `apps/web` (using `pnpm` workspace).
+- Integrated Semantic UI tokens into `tailwind.config.ts` and `src/app/globals.css`.
+- Built Information Architecture (IA) routing stubs: `/login`, `/returns`, `/returns/[id]`, `/passport/[id]`, `/matches`, `/marketplace`, and `/sustainability`.
 
-### P0-A5 — shared contracts (completed this session)
-**Python side** (`packages/shared-py/shared_py/schemas/`):
-- `enums.py` — 5 shared enums: Grade (A/B/C/D), LifecycleAction (RESELL/REFURBISH/DONATE/RECYCLE/HYPERLOCAL), ReturnStatus (SUBMITTED through SOLD plus FAILED), ListingChannel, ListingStatus
-- `rest_contracts.py` — Cross-service DTOs: UserCandidatesListResponse (Matching→User contract), ReturnResponse (Gateway owns Return), ProductResponse (Passport owns Product), PaginatedResponse, HealthResponse, ErrorEnvelope
-- `SERVICE_ENDPOINTS.md` — Complete REST catalog documenting all 7 services, every endpoint, cross-service call patterns
+### P0-C2 — Primitives Batch 1 + AppShell/NavBar
+- Built Primitives in `src/components/ui/`: `Button`, `Card`, `Badge`, `Input`, `Label`, `Skeleton`, and `Avatar`.
+- Built Layouts in `src/components/layout/`: `AppShell` and `NavBar` (with mock green credits and user profile menu).
+- Implemented `QueryClientProvider` via `src/components/providers.tsx` mapped at the root `layout.tsx`.
+- Ran `/imprint` to capture `Avatar` and `NavBar` pattern definitions into `docs/ui-registry.md`.
 
-**TypeScript side** (`apps/web/types/`):
-- `enums.ts` — TypeScript mirror of Python enums (exact value matching)
-- `events.ts` — EventEnvelope<T> + 10 event payload interfaces + union types
-- `api.ts` — Full API response types for all services (User, Return, Grade, Decision, Passport, Match, Listing, Sustainability)
-- `index.ts` — barrel export, `README.md` — sync protocol documentation
-
-### Package structure fix (this session)
-- Reorganized `packages/shared-py/` to proper structure: moved modules into `shared_py/` subdirectory so imports work correctly (`from shared_py.events import ...`)
-- Added `shared_py/__init__.py` with version info
-
----
+### P0-C3 — Frontend Mock Layer + Typed API Client
+- Implemented `src/lib/api-client.ts` with `USE_MOCKS` default toggle.
+- Uses exact TypeScript definitions mapped by Member A (`apps/web/types/api.ts`).
 
 ## Decisions made
-
-1. **Redis Streams for event bus** — at-least-once delivery with replay capability, wrapped in shared events package
-2. **Idempotency via in-memory cache** — event_id deduplication using set (10k entry limit with FIFO eviction); production could use Redis-backed cache
-3. **DLQ after 3 retries** — failed events move to `slmai:events:dlq` stream, owning service sets Return.status = FAILED to halt saga cleanly
-4. **Contract-first approach** — all 10 events defined with Pydantic schemas before any service implementation
-5. **TypeScript mirrors Python exactly** — enum values, field names, types match one-to-one for cross-stack consistency
-6. **SERVICE_ENDPOINTS.md as binding catalog** — documents all REST endpoints, cross-service patterns, OpenAPI locations; serves as implementation reference
-
----
+- Next.js scaffolding uses `src/app` standard with `pnpm` workspaces.
+- Component tokens (`gold-700` and `--header-height`) injected cleanly into the `tailwind.config.ts` extension instead of using raw bracket heights/colors, adhering to the UI token system.
+- `NavBar` component isolated out of `AppShell` to enforce clear separation of concerns, carrying user context separately from page layout structural wrappers.
 
 ## Problems solved
-
-1. **Package structure mismatch** — imports were failing because folders were at wrong level. Fixed by creating proper `shared_py/` parent directory and moving `ai/`, `config/`, `events/`, `schemas/`, `web/` inside it.
-2. **Hatchling package discovery** — needed to structure package correctly for editable installs to work (`pip install -e packages/shared-py`)
-
----
+- Scaffolding issues where `pnpm` execution `node_modules` store clashes resulted from nested directories were scrubbed and cleanly reinstalled.
+- Removed raw hex color drift (e.g. `border-[#CC7A00]`) resulting in strict mapping to Tailwind's extended color config.
 
 ## Current state
+**Phase 0 — Member C: 3/3 tasks complete ✅**
 
-**Phase 0 — Member A: 5/5 tasks complete ✅**
-- P0-A1: Monorepo scaffold ✅
-- P0-A2: Docker Compose infra ✅  
-- P0-A3: shared-py/web base ✅
-- P0-A4: shared-py/events wrapper ✅ (completed this session)
-- P0-A5: Shared contracts ✅ (completed this session)
-
-**What works:**
-- Docker Compose boots: Postgres (6 DBs), Redis, MinIO, all 7 services
-- Shared-py package: config, web factory, events (publish/subscribe/DLQ), schemas (enums + REST contracts)
-- 10 event types fully defined with validation
-- 5 shared enums in both Python and TypeScript
-- Cross-service contracts documented in SERVICE_ENDPOINTS.md
-- TypeScript types ready in apps/web/types/
-
-**Syntax validated:** All Python files compile cleanly with `python -m py_compile`
-
-**Phase 0 overall status:**
-- Member A: 5/5 ✅ (100% complete)
-- Member B: 0/3 (P0-B1 AI wrapper, P0-B2 seed, P0-B3 observability)
-- Member C: 0/3 (P0-C1 web scaffold, P0-C2 primitives, P0-C3 API client)
-
-**CP0 checkpoint:**
-- ✅ Infra boots
-- ✅ Events wrapper with DLQ ready
-- ✅ Enums + REST contracts in both stacks
-- ⬜ Seed (needs P0-B2)
-- ⬜ Frontend shell (needs P0-C1/C2/C3)
-
----
+What works:
+- React Query (`QueryClientProvider`) wraps the Next.js shell successfully.
+- `api-client.ts` effectively provides typed responses to mock queries matching the exact python backend contract.
+- Primitives (`Button`, `Card`, etc.) map flawlessly to Amazon token styling via Tailwind CVA variants.
 
 ## Next session starts with
-
-**Member A can proceed to Phase 1 immediately** — all dependencies satisfied.
-
-**P1-A1 — User Service:**
-- Auth endpoints (register/login) with password hashing
-- JWT token issuance (HS256 with shared JWT_SECRET)
-- User profile CRUD
-- GET /users/candidates endpoint (for Matching service)
-- SQLAlchemy models + Alembic migrations
-- Tests
-
-**P1-A2 — API Gateway + Returns intake:**
-- JWT verification middleware
-- POST /returns endpoint (creates Return, uploads to MinIO, emits ReturnSubmitted)
-- Route proxying to services
-- CORS configuration
-- Aggregation endpoints for BFF pattern
-
-Both can start now — P0-A3 (web base), P0-A4 (events), and P0-A5 (contracts) are complete.
-
----
+**Member C can proceed to Phase 1: Authentication + Returns intake UIs.**
+- **P1-C1 (Auth UI + JWT Client):** Create `/login` and `/register` client-side views and connect to Auth Mock.
+- **P1-C2 (Returns Intake flow):** Build multi-step wizard for Product returns at `/returns`.
+- **P1-C3 (Returns Dashboard):** Connect the Returns API client endpoint to populate the `/returns/[id]` return status view.
 
 ## Open questions
-
-None — Member A's foundation work is complete and unblocks the team.
-
----
-
-## Key files created this session
-
-**Events wrapper:**
-- `packages/shared-py/shared_py/events/schemas.py` (218 lines)
-- `packages/shared-py/shared_py/events/client.py` (125 lines)
-- `packages/shared-py/shared_py/events/handlers.py` (278 lines)
-- `packages/shared-py/shared_py/events/__init__.py` (updated)
-- `packages/shared-py/tests/test_events.py` (380 lines)
-
-**Shared contracts:**
-- `packages/shared-py/shared_py/schemas/enums.py` (86 lines)
-- `packages/shared-py/shared_py/schemas/rest_contracts.py` (170 lines)
-- `packages/shared-py/shared_py/schemas/SERVICE_ENDPOINTS.md` (180 lines)
-- `packages/shared-py/shared_py/schemas/__init__.py` (updated)
-
-**TypeScript types:**
-- `apps/web/types/enums.ts` (75 lines)
-- `apps/web/types/events.ts` (150 lines)
-- `apps/web/types/api.ts` (220 lines)
-- `apps/web/types/index.ts` (barrel export)
-- `apps/web/types/README.md` (sync protocol)
-
-**Documentation updated:**
-- `docs/progress-tracker.md` — P0-A4 and P0-A5 marked complete
+None — Member C's Phase 0 tasks are completely verified and fully unblock frontend progression.

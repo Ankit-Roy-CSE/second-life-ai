@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-13 · **Updated by:** A · **Latest:** P0-A5 shared contracts complete — **ALL Member A Phase 0 tasks done!**
+**Last updated:** 2026-06-13 · **Updated by:** C · **Latest:** P0-C1, P0-C2, P0-C3 complete — **Phase 0 done for Member A and C!**
 
 ---
 
@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 5 | 0 | 0 | 6 |
+| Phase 0 — Foundation | 11 | 8 | 0 | 0 | 3 |
 | Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **5** | **0** | **0** | **29** |
+| **Total** | **34** | **8** | **0** | **0** | **26** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -48,9 +48,9 @@
 | P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | 📋 Not started | — | — |
 | P0-B2 | B | Minimal seed/fixtures (`scripts/seed_min.py`) | 📋 Not started | — | — |
 | P0-B3 | B | Event-saga observability (tail + `/debug/events` + replay) | 📋 Not started | — | — |
-| P0-C1 | C | Web scaffold + tokens + route-map/IA | 📋 Not started | — | — |
-| P0-C2 | C | Primitives batch 1 + AppShell/NavBar | 📋 Not started | — | — |
-| P0-C3 | C | Frontend mock layer + typed API client | 📋 Not started | — | — |
+| P0-C1 | C | Web scaffold + tokens + route-map/IA | ✅ Done | Next.js app scaffolding, tailwind.config.ts, globals.css setup with Amazon tokens, routing pages created | c/web/p0-c1 |
+| P0-C2 | C | Primitives batch 1 + AppShell/NavBar | ✅ Done | Button, Card, Badge, Input, Label, Skeleton, AppShell created | c/web/p0-c2 |
+| P0-C3 | C | Frontend mock layer + typed API client | ✅ Done | api-client.ts created with mock approach using generated types | c/web/p0-c3 |
 
 **Checkpoint CP0:** ⬜ Not verified — _infra boots; seed loads; shell+tokens render vs mocks; events round-trip + DLQ; enums + REST contracts in both stacks._
 
