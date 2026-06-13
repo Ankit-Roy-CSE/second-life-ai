@@ -14,7 +14,7 @@ Cross-service read patterns (from architecture.md):
 
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -92,8 +92,7 @@ class ReturnResponse(BaseModel):
     )
     created_at: str = Field(..., description="ISO-8601 UTC timestamp")
 
-    class Config:
-        populate_by_name = True  # Allow both 'id' and 'return_id'
+    model_config = ConfigDict(populate_by_name=True)  # Allow both 'id' and 'return_id'
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -119,8 +118,7 @@ class ProductResponse(BaseModel):
     )
     created_at: str = Field(..., description="ISO-8601 UTC timestamp")
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

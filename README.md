@@ -100,6 +100,41 @@ pnpm dev
 pnpm lint && pnpm build
 ```
 
+### Local Testing
+
+**One-time setup** — install the shared library in editable mode so `from shared_py ...` imports resolve (this is the fix for `ImportError` when collecting tests):
+
+```bash
+# From the repo root
+python -m venv .venv
+.venv\Scripts\Activate.ps1                 # PowerShell (Windows)
+# source .venv/bin/activate                # macOS/Linux
+pip install -e "packages/shared-py[dev]"   # installs shared_py + pytest, pytest-asyncio, ruff, black
+```
+
+> If `python` isn't on your PATH, use the `py` launcher: `py -m venv .venv`, `py -m pip install -e "packages/shared-py[dev]"`, `py -m pytest ...`.
+
+**Run tests:**
+
+```bash
+# Shared package
+cd packages/shared-py
+pytest                       # all tests
+pytest tests/test_ai.py -v   # one module, verbose
+
+# A single service
+cd services/grading
+pytest
+```
+
+**Testing rules:**
+
+- Always run with `AI_MODE=mock` — never call AWS in tests.
+- Async tests run automatically (`asyncio_mode = "auto"` is set in `pyproject.toml`).
+- Route tests use `httpx.AsyncClient(transport=ASGITransport(app=app))`, not a live server.
+- Minimum per feature: 1 happy-path route test + 1 domain-logic unit test.
+- DB tests use a disposable test DB or transactional rollback — don't hit the dev DB.
+
 ### Reset everything
 
 ```bash

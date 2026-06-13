@@ -122,11 +122,14 @@ Each entry has: **Purpose · Version · Where used · Usage rules · Gotchas**. 
 -**Where:****only** inside `packages/shared-py/ai`. 🚫 Never import boto3 in a service
  router/domain.
 -**Usage rules:**
-- The `ai` wrapper exposes typed functions returning Pydantic results:
- `analyze_media(...) -> VisionResult`, `summarize_damage(...) -> DamageSummary`,
- `decide_lifecycle(...) -> DecisionResult`, `match_rationale(...) -> str`.
+- The `ai` wrapper (`from shared_py.ai import ai_client`) exposes typed async methods:
+ `analyze_media(...) -> MediaLabels`, `summarize_damage(...) -> DamageSummary`,
+ `decide_lifecycle(...) -> LifecycleDecision`, `match_rationale(...) -> MatchRationale`,
+ plus convenience `grade_product(...) -> GradeResult` (combines analyze + summarize).
+- All methods accept an optional `correlation_id: str` kwarg for structured logging.
+- Golden-path demo constants: `GOLDEN_PATH_MEDIA_KEY`, `GOLDEN_PATH_CATEGORY`, `GOLDEN_PATH_REASON`.
 - Mode via `AI_MODE` env: `mock` (default), `aws`, `hybrid`. Mock is deterministic and
- network-free.
+ network-free. `BEDROCK_MODEL_ID` env configures which model to invoke.
 - Bedrock: use `bedrock-runtime` `invoke_model`; prompts live in `ai/prompts/*` and are
  versioned. Rekognition: `detect_labels` / `detect_moderation_labels` (+ sampled frames for
  video).

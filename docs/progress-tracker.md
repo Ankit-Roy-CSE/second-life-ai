@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-13 · **Updated by:** C · **Latest:** P0-C1, P0-C2, P0-C3 complete — **Phase 0 done for Member A and C!**
+**Last updated:** 2026-06-13 · **Updated by:** C · **Latest:** P0-C1, P0-C2, P0-C3 complete — **Phase 0 done for Member A, B and C!**
 
 ---
 
@@ -45,9 +45,9 @@
 | P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | ✅ Done | `shared_py.web.create_app()` factory with CORS, CorrelationId + RequestLogging middleware, /health + /ready endpoints, ErrorEnvelope handlers, AppError; `shared_py.config` base settings + structured JSON logging; `shared_py.web.auth` JWT helpers; all service main.py + config.py updated to use BaseServiceSettings; tests in packages/shared-py/tests/test_web.py | a/shared/p0-a3 |
 | P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | ✅ Done | Redis Streams publish/subscribe wrapper with EventEnvelope, idempotency via event_id dedupe, retry→DLQ after MAX_RETRIES, all 10 event schemas from architecture.md §6, comprehensive tests; files: events/client.py (publish + Redis singleton), events/handlers.py (@subscribe decorator + consumer loop + DLQ), events/schemas.py (EventEnvelope + 10 event payload models), tests/test_events.py | a/events/p0-a4 |
 | P0-A5 | A | Shared contracts (enums+events+REST stubs+cross-service reads) | ✅ Done | Python: enums.py (5 enums: Grade, LifecycleAction, ReturnStatus, ListingChannel, ListingStatus), rest_contracts.py (cross-service DTOs: UserCandidatesListResponse for Matching→User, ReturnResponse/ProductResponse ownership, PaginatedResponse standard), SERVICE_ENDPOINTS.md (complete REST catalog for all 7 services); TypeScript: enums.ts, events.ts (10 event types), api.ts (full API response types), index.ts, README.md; contracts ready for Phase 1 | a/contracts/p0-a5 |
-| P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | 📋 Not started | — | — |
-| P0-B2 | B | Minimal seed/fixtures (`scripts/seed_min.py`) | 📋 Not started | — | — |
-| P0-B3 | B | Event-saga observability (tail + `/debug/events` + replay) | 📋 Not started | — | — |
+| P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | ✅ Done | AI client with mode switching (mock/aws/hybrid); 5 typed methods matching spec: `analyze_media`, `summarize_damage`, `decide_lifecycle`, `match_rationale` + convenience `grade_product`; deterministic mock seeded from media-key hash (fallback to reason+category); golden-path constants (`GOLDEN_PATH_MEDIA_KEY`); `BEDROCK_MODEL_ID` env support; `correlation_id` kwarg on all methods for structured logging; Pydantic v2 idiomatic schemas (GradeResult, LifecycleDecision, MatchRationale, DefectItem, DamageSummary, MediaLabels); prompt templates in ai/prompts/; 22 tests covering determinism, golden-path saga, spec function separation, grade logic, lifecycle logic, match rationale, mode switching, graceful degradation | b/ai/p0-b1 |
+| P0-B2 | B | Minimal seed/fixtures (`scripts/seed_min.py`) | ✅ Done | 6 users (1 returner + 4 nearby buyers with lat/lng + interests + 1 admin), 4 products across 3 categories, 2 returns (golden-path headphones + laptop), MinIO placeholder uploads, idempotent upserts (ON CONFLICT), graceful skip if tables not yet migrated, --reset flag, seed manifest printout; golden-path constants wired to GOLDEN_PATH_MEDIA_KEY | b/seed/p0-b2 |
+| P0-B3 | B | Event-saga observability (tail + `/debug/events` + replay) | ✅ Done | `scripts/events_tail.py`: 5 commands (tail/dump/trigger/replay/stats), ANSI colour output, correlation_id filter, DLQ support, golden-path trigger flag, Redis connectivity check; `services/gateway/app/api/debug_routes.py`: GET /debug/events, GET /debug/events/dlq, GET /debug/events/stats, POST /debug/events/trigger with payload validation; wired into gateway main.py | b/observability/p0-b3 |
 | P0-C1 | C | Web scaffold + tokens + route-map/IA | ✅ Done | Next.js app scaffolding, tailwind.config.ts, globals.css setup with Amazon tokens, routing pages created | c/web/p0-c1 |
 | P0-C2 | C | Primitives batch 1 + AppShell/NavBar | ✅ Done | Button, Card, Badge, Input, Label, Skeleton, AppShell created | c/web/p0-c2 |
 | P0-C3 | C | Frontend mock layer + typed API client | ✅ Done | api-client.ts created with mock approach using generated types | c/web/p0-c3 |
