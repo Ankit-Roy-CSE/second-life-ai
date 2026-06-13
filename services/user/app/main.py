@@ -1,4 +1,11 @@
-# User service entry point — fully implemented in P1-A1
-from shared_py.web import create_app  # noqa: F401
+"""
+User Service — entry point.
+Full implementation (auth, profile, credits) in P1-A1.
+Stub provides working /health and /ready from Phase 0.
+"""
 
-app = create_app(service_name="user")
+from shared_py.web import create_app
+
+from app.config import settings
+
+app = create_app(service_name=settings.service_name)

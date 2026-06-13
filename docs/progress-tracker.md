@@ -26,11 +26,11 @@
 
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
-| Phase 0 — Foundation | 11 | 1 | 0 | 0 | 10 |
+| Phase 0 — Foundation | 11 | 3 | 0 | 0 | 8 |
 | Phase 1 — Core | 7 | 0 | 0 | 0 | 7 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **1** | **0** | **0** | **33** |
+| **Total** | **34** | **3** | **0** | **0** | **31** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -41,8 +41,8 @@
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
 | P0-A1 | A | Monorepo scaffold (`.gitignore`, README, `.env.example`) | ✅ Done | Folder structure, all service stubs, Dockerfiles, docker-compose.yml, infra/postgres/init.sql, pyproject.toml, .gitignore, .env.example, README.md | a/scaffold/p0-a1 |
-| P0-A2 | A | Docker Compose (Postgres multi-DB, Redis, MinIO) | 📋 Not started | — | — |
-| P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | 📋 Not started | — | — |
+| P0-A2 | A | Docker Compose (Postgres multi-DB, Redis, MinIO) | ✅ Done | docker-compose.yml with all 7 services + Postgres 16 (6 DBs via init.sql), Redis 7, MinIO (pinned release) + minio-init bucket setup; healthchecks on all infra; curl added to all service images; dev.sh + dev.ps1 helper scripts | a/infra/p0-a2 |
+| P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | ✅ Done | `shared_py.web.create_app()` factory with CORS, CorrelationId + RequestLogging middleware, /health + /ready endpoints, ErrorEnvelope handlers, AppError; `shared_py.config` base settings + structured JSON logging; `shared_py.web.auth` JWT helpers; all service main.py + config.py updated to use BaseServiceSettings; tests in packages/shared-py/tests/test_web.py | a/shared/p0-a3 |
 | P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | 📋 Not started | — | — |
 | P0-A5 | A | Shared contracts (enums+events+REST stubs+cross-service reads) | 📋 Not started | — | — |
 | P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | 📋 Not started | — | — |

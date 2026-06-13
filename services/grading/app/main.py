@@ -1,4 +1,10 @@
-# AI Grading service — fully implemented in P1-B1 (Owner: B)
-from shared_py.web import create_app  # noqa: F401
+"""
+AI Grading Service — entry point.
+Full implementation (Rekognition + Bedrock, ProductGraded event) in P1-B1.
+"""
 
-app = create_app(service_name="grading")
+from shared_py.web import create_app
+
+from app.config import settings
+
+app = create_app(service_name=settings.service_name)

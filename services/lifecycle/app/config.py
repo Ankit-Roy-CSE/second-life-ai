@@ -1,14 +1,12 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import SettingsConfigDict
+from shared_py.config.settings import BaseServiceSettings
 
 
-class Settings(BaseSettings):
+class Settings(BaseServiceSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    service_name: str = "lifecycle"
     database_url: str = "postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_lifecycle"
-    redis_url: str = "redis://redis:6379/0"
-    ai_mode: str = "mock"
-    aws_region: str = "us-east-1"
-    bedrock_model_id: str = "anthropic.claude-3-haiku-20240307-v1:0"
 
 
 settings = Settings()

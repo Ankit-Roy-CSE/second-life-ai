@@ -30,6 +30,7 @@ exclude = '''
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = [
+    "packages/shared-py/tests",
     "services/gateway/tests",
     "services/user/tests",
     "services/grading/tests",
@@ -37,5 +38,4 @@ testpaths = [
     "services/passport/tests",
     "services/matching/tests",
     "services/sustainability/tests",
-    "packages/shared-py/tests",
 ]

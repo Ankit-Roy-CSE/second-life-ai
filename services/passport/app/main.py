@@ -1,4 +1,10 @@
-# Passport service entry point — fully implemented in P2-A1
-from shared_py.web import create_app  # noqa: F401
+"""
+Product Passport Service — entry point.
+Full implementation in P2-A1.
+"""
 
-app = create_app(service_name="passport")
+from shared_py.web import create_app
+
+from app.config import settings
+
+app = create_app(service_name=settings.service_name)
