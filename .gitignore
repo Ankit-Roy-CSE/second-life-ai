@@ -1,0 +1,60 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# === Alembic generated (keep versions/ but not temp files) ===
+# nothing extra — alembic/ folders are committed
+
+# === Environment / secrets ===
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# === Node / pnpm ===
+node_modules/
+.next/
+out/
+.pnpm-store/
+.turbo/
+
+# === Docker ===
+# keep docker-compose.yml but ignore local override
+docker-compose.override.yml
+
+# === IDEs ===
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# === MinIO / S3 local data ===
+minio-data/
+
+# === Postgres local volume ===
+postgres-data/
+
+# === Misc ===
+*.bak
+*.tmp

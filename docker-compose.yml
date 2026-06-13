@@ -1,0 +1,271 @@
+version: "3.9"
+
+# =============================================================================
+# Amazon Second Life AI — Local Development Stack
+# =============================================================================
+# Usage:
+#   docker compose up --build                    # start everything
+#   docker compose up --build postgres redis minio  # infra only
+#   docker compose down -v                       # stop + wipe volumes
+#   docker compose logs -f gateway               # tail one service
+#
+# All services read config from .env (copy .env.example → .env first).
+# AI_MODE=mock by default — no AWS keys required.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Shared defaults applied to every backend service via YAML anchors
+# ---------------------------------------------------------------------------
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  env_file: .env
+  networks:
+    - slmai
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+# ---------------------------------------------------------------------------
+# Shared defaults for services that also need MinIO (media upload/read)
+# ---------------------------------------------------------------------------
+x-service-media-defaults: &service-media-defaults
+  <<: *service-defaults
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    minio:
+      condition: service_healthy
+
+networks:
+  slmai:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  minio-data:
+
+# ---------------------------------------------------------------------------
+# Services
+# ---------------------------------------------------------------------------
+services:
+
+  # ===== Infrastructure =====
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: slmai
+      POSTGRES_PASSWORD: slmai_password
+      # slmai_user is the default DB created by the image; init.sql creates the rest
+      POSTGRES_DB: slmai_user
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - slmai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slmai -d slmai_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    # Ephemeral — no persistence needed for the event bus in dev
+    command: redis-server --save "" --appendonly no
+    ports:
+      - "6379:6379"
+    networks:
+      - slmai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  minio:
+    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    networks:
+      - slmai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  # Creates the slmai-media bucket on first run then exits cleanly.
+  minio-init:
+    image: minio/mc:RELEASE.2024-06-13T22-53-53Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - slmai
+    restart: "no"
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Waiting for MinIO...' &&
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/slmai-media &&
+        mc anonymous set download local/slmai-media &&
+        echo 'slmai-media bucket ready'
+      "
+
+  # ===== Backend Services — Member A (gateway, user, passport) =====
+
+  gateway:
+    <<: *service-media-defaults
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      USER_SERVICE_URL: http://user:8001
+      GRADING_SERVICE_URL: http://grading:8002
+      LIFECYCLE_SERVICE_URL: http://lifecycle:8003
+      PASSPORT_SERVICE_URL: http://passport:8004
+      MATCHING_SERVICE_URL: http://matching:8005
+      SUSTAINABILITY_SERVICE_URL: http://sustainability:8006
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT_URL: http://minio:9000
+      CORS_ORIGINS: http://localhost:3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  user:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_user
+      REDIS_URL: redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  passport:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: services/passport/Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_passport
+      REDIS_URL: redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ===== Backend Services — Member B (grading, lifecycle, matching, sustainability) =====
+
+  grading:
+    <<: *service-media-defaults
+    build:
+      context: .
+      dockerfile: services/grading/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_grading
+      REDIS_URL: redis://redis:6379/0
+      AI_MODE: mock
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: slmai-media
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  lifecycle:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: services/lifecycle/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_lifecycle
+      REDIS_URL: redis://redis:6379/0
+      AI_MODE: mock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  matching:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: services/matching/Dockerfile
+    ports:
+      - "8005:8005"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_matching
+      REDIS_URL: redis://redis:6379/0
+      AI_MODE: mock
+      USER_SERVICE_URL: http://user:8001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  sustainability:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: services/sustainability/Dockerfile
+    ports:
+      - "8006:8006"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://slmai:slmai_password@postgres:5432/slmai_sustainability
+      REDIS_URL: redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

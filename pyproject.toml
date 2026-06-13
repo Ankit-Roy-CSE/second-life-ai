@@ -1,0 +1,41 @@
+# Root pyproject.toml — monorepo-wide Python tooling config
+# Individual services have their own pyproject.toml for dependencies.
+# This file owns shared lint/format/test settings so all services stay consistent.
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]  # black handles long lines
+exclude = [
+    ".git",
+    ".venv",
+    "node_modules",
+    "dist",
+    "build",
+    "alembic/versions",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | node_modules
+  | alembic/versions
+)/
+'''
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = [
+    "packages/shared-py/tests",
+    "services/gateway/tests",
+    "services/user/tests",
+    "services/grading/tests",
+    "services/lifecycle/tests",
+    "services/passport/tests",
+    "services/matching/tests",
+    "services/sustainability/tests",
+]
