@@ -42,7 +42,7 @@
 Generic, token-driven, no business logic. Many are generated/adapted from shadcn/ui.
 
 ### Button
-- **Status:** 📋 Planned
+- **Status:** ✅ Built
 - **Path:** components/ui/Button.tsx
 - **Owner:** C
 - **Purpose:** Primary interactive control.
@@ -93,7 +93,7 @@ Generic, token-driven, no business logic. Many are generated/adapted from shadcn
 - **Notes:** Always used with a `<Label>`; error state links helper text via `aria-describedby`.
 
 ### Label
-- **Status:** 📋 Planned · **Path:** components/ui/Label.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Label.tsx · **Owner:** C
 - **Purpose:** Accessible form label. **Tokens:** `text-sm font-medium foreground`.
 
 ### Select
@@ -116,7 +116,7 @@ Generic, token-driven, no business logic. Many are generated/adapted from shadcn
 - **Tokens:** `muted` track, `primary`/grade fill, `rounded-full`.
 
 ### Skeleton
-- **Status:** 📋 Planned · **Path:** components/ui/Skeleton.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Skeleton.tsx · **Owner:** C
 - **Purpose:** Loading placeholder. **Tokens:** `muted`, `rounded-md`, pulse animation.
 
 ### Toast / Toaster
@@ -232,12 +232,24 @@ Use primitives + domain data. Owned by C; data shapes come from backend DTOs.
 ## Layer 3 — Layout (`components/layout/`)
 
 ### AppShell
-- **Status:** 📋 Planned · **Path:** components/layout/AppShell.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/layout/AppShell.tsx · **Owner:** C
 - **Purpose:** Top nav + content container; wraps all routes. **Tokens:** `header-height`, `container-max`, `z-sticky`.
 
 ### NavBar
-- **Status:** 📋 Planned · **Path:** components/layout/NavBar.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/layout/NavBar.tsx · **Owner:** C
 - **Purpose:** Brand, primary nav links, user menu, green-credit balance. **Depends on:** Button, Avatar.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-secondary` |
+| Text — primary   | `text-secondary-foreground` |
+| Text — links     | `text-white hover:text-primary` |
+| Shadow           | `shadow-sm` |
+| Spacing          | `h-header` (60px), `px-4 md:px-6 lg:px-8` |
+| Positioning      | `sticky top-0 z-[1100]` |
+
+**Pattern notes:**
+The NavBar anchors the top of the interface. It strongly uses the `secondary` brand color (Navy) to ground the design. Links hover to `primary` (Gold) to provide high-contrast interactive states.
 
 ### Sidebar (optional)
 - **Status:** 📋 Planned · **Path:** components/layout/Sidebar.tsx · **Owner:** C
@@ -260,9 +272,9 @@ Use primitives + domain data. Owned by C; data shapes come from backend DTOs.
 
 | Layer | Built | In progress | Planned |
 |-------|-------|-------------|---------|
-| Primitives | 0 | 0 | 14 |
+| Primitives | 6 | 0 | 8 |
 | Composite/feature | 0 | 0 | 11 |
-| Layout | 0 | 0 | 3 |
+| Layout | 1 | 0 | 2 |
 
 > Update the counts and individual statuses as components are built. The first agent to build
 > a primitive should flip its status to 🚧 then ✅ and fill in the real prop signature.
