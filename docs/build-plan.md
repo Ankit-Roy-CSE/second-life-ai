@@ -11,8 +11,8 @@
 
 | Member | Role | Primary surface |
 |--------|------|-----------------|
-| **A** | Full-Stack Developer | Infra, shared packages, Gateway, User, Passport, event wiring, DB, Docker Compose, seed/fixtures, observability |
-| **B** | AI & Backend Engineer | AI wrapper (Bedrock/Rekognition/mock), Grading, Lifecycle, Matching, Sustainability, prompts, scoring |
+| **A** | Full-Stack Developer | Infra, shared packages, Gateway, User, Passport, event wiring, DB, Docker Compose, full demo seed, dev scripts |
+| **B** | AI & Backend Engineer | AI wrapper (Bedrock/Rekognition/mock), Grading, Lifecycle, Matching, Sustainability, prompts, scoring, minimal seed/fixtures, event-saga observability tooling |
 | **C** | Frontend Engineer | Next.js app, design system (tokens + registry), all 5 feature UIs, Vercel deploy |
 
 ### Service → owner (every service is owned)
@@ -74,9 +74,9 @@ graph LR
 | **P0-A3** | A | shared-py base web | `create_app()` factory: health/`ready`, JSON error envelope, structured logging, CORS, settings base | P0-A1 |
 | **P0-A4** | A | shared-py events wrapper | Redis Streams `publish()` + `@subscribe()` over `slmai:events`, envelope builder, idempotency/`event_id` dedupe; **retry → dead-letter** (`slmai:events:dlq`) after repeated handler failure | P0-A3 |
 | **P0-A5** | A | Shared contracts (+ REST + cross-service reads) | `shared-py/schemas`: enums (Grade, LifecycleAction, ReturnStatus **incl. `FAILED`**, ListingChannel/Status) + event payload models; **per-service REST/OpenAPI stubs** (endpoint list + req/resp models); **cross-service read contracts** — Matching→User `GET /users/candidates?category=&lat=&lng=`, Gateway creates `Return`, Passport owns `Product`; mirror in `apps/web/types`; commit event catalog | P0-A1 |
-| **P0-A6** | A | Minimal seed/fixtures | `scripts/seed_min.py`: demo users (location + interests), products, a couple of sample returns — usable by **B** (AI tuning) and **C** (real UIs) from Phase 0 | P0-A2, P0-A5 |
-| **P0-A7** | A | Event-saga observability | `scripts/events_tail.py` (tail `slmai:events` + DLQ), Gateway `/debug/events` read view, manual event **trigger/replay** helper | P0-A4 |
 | **P0-B1** | B | shared-py AI wrapper (mock) | `ai` package: typed `analyze_media/summarize_damage/decide_lifecycle/match_rationale`; deterministic **mock mode** (seeded so a **golden-path demo product** is reproducible); `AI_MODE` switch; prompt scaffolding in `ai/prompts/` | P0-A3 |
+| **P0-B2** | B | Minimal seed/fixtures | `scripts/seed_min.py`: demo users (location + interests), products, a couple of sample returns — usable by **B** (AI tuning) and **C** (real UIs) from Phase 0 | P0-A2, P0-A5 |
+| **P0-B3** | B | Event-saga observability | `scripts/events_tail.py` (tail `slmai:events` + DLQ), Gateway `/debug/events` read view (added in coordination with **A**, the gateway owner), manual event **trigger/replay** helper | P0-A4 |
 | **P0-C1** | C | Web scaffold + tokens + IA | Next.js 14 (App Router, TS, pnpm) + Tailwind; `globals.css` CSS vars + `tailwind.config.ts` from [ui-tokens.md](ui-tokens.md); Inter via `next/font`; **route map / IA**: `/login`, `/returns`, `/returns/[id]`, `/passport/[id]`, `/matches`, `/marketplace`, `/sustainability` | P0-A1 |
 | **P0-C2** | C | Primitives batch 1 + shell | `cn()`, QueryClient provider, `AppShell`/`NavBar`, primitives: Button, Card, Badge, Input, Label, Skeleton → register in [ui-registry.md](ui-registry.md) | P0-C1 |
 | **P0-C3** | C | Frontend mock layer + API client | typed Gateway API client + Zod response schemas mirroring `P0-A5`; **mock layer** (MSW or static fixtures) so UI builds before endpoints land | P0-C1, P0-A5 |
@@ -140,7 +140,7 @@ graph LR
 
 | ID | Owner | Task | Deliverable | Depends on |
 |----|-------|------|-------------|-----------|
-| **P3-A1** | A | Seed + demo wiring | `scripts/seed.py` (full demo narrative on top of `seed_min`); Gateway read-model/aggregates for dashboard; demo `PurchaseCompleted` trigger | P2-A2, P2-B2 |
+| **P3-A1** | A | Seed + demo wiring | `scripts/seed.py` (full demo narrative on top of `seed_min`); Gateway read-model/aggregates for dashboard; demo `PurchaseCompleted` trigger | P0-B2, P2-A2, P2-B2 |
 | **P3-A2** | A | E2E smoke + failure path + hardening | full `docker compose up` smoke pass; **saga failure-path test** (return that fails grading → `FAILED`, no stall, lands in DLQ); fix integration gaps; finalize `.env.example` + run docs | CP2 |
 | **P3-B1** | B | Sustainability metrics finalize | totals, green-credit accrual, dashboard data endpoints | P2-B2 |
 | **P3-B2** | B | Golden-path demo + AI fallback test | lock the deterministic **golden-path demo product** (grade→decision→match→sustainability); verify fallback path with keys absent | P2-B3 |
@@ -185,8 +185,12 @@ next phase's integration-dependent tasks.
 ## Parallelization Rules (avoid collisions)
 
 -**Own your folders.** A: `services/{gateway,user,passport}` + `packages/shared-py`
- (events/config/web/schemas) + infra + `scripts/`. B: `services/{grading,lifecycle,matching,sustainability}`
-+ `packages/shared-py/ai`. C: `apps/web`.
+ (events/config/web/schemas) + infra + `scripts/seed.py` + dev bring-up scripts. B:
+ `services/{grading,lifecycle,matching,sustainability}` + `packages/shared-py/ai` +
+ `scripts/{seed_min.py,events_tail.py}` (seed + observability tooling). C: `apps/web`.
+ **Note:** `scripts/` is shared at the file level — B owns `seed_min.py` + `events_tail.py`,
+ A owns the full demo `seed.py` and dev scripts; the Gateway `/debug/events` read view lives in
+ A's `gateway` and is added by B in coordination with A.
 -**Contracts before code.** Any change to an enum, event payload, or Gateway route is a
  contract change — announce it, update [code-standards.md](code-standards.md) §4 /
  [architecture.md](architecture.md) §6, and bump both stacks.

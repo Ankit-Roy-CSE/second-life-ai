@@ -45,9 +45,9 @@
 | P0-A3 | A | shared-py base web (`create_app`, health, errors, logging) | 📋 Not started | — | — |
 | P0-A4 | A | shared-py events wrapper (Redis Streams + DLQ) | 📋 Not started | — | — |
 | P0-A5 | A | Shared contracts (enums+events+REST stubs+cross-service reads) | 📋 Not started | — | — |
-| P0-A6 | A | Minimal seed/fixtures (`scripts/seed_min.py`) | 📋 Not started | — | — |
-| P0-A7 | A | Event-saga observability (tail + `/debug/events` + replay) | 📋 Not started | — | — |
 | P0-B1 | B | shared-py AI wrapper + mock mode (golden-path seeded) | 📋 Not started | — | — |
+| P0-B2 | B | Minimal seed/fixtures (`scripts/seed_min.py`) | 📋 Not started | — | — |
+| P0-B3 | B | Event-saga observability (tail + `/debug/events` + replay) | 📋 Not started | — | — |
 | P0-C1 | C | Web scaffold + tokens + route-map/IA | 📋 Not started | — | — |
 | P0-C2 | C | Primitives batch 1 + AppShell/NavBar | 📋 Not started | — | — |
 | P0-C3 | C | Frontend mock layer + typed API client | 📋 Not started | — | — |

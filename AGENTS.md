@@ -188,11 +188,11 @@ debug logging; and ****[docs/progress-tracker.md](**docs/progress-tracker.md**)*
 
 2. First tasks: ****P0-A1 → P0-A2 → P0-A3 → P0-A4 → P0-A5**** (scaffold, infra, shared base, events,
 
-   contracts), then ****P0-A6**** (seed) + ****P0-A7**** (event observability). These unblock B and C —
+   contracts). These unblock B and C —
 
    do them early.
 
-3. Then User + Gateway (P1-A1/A2), Passport + Gateway aggregation (P2-A1/A2), seed/demo +
+3. Then User + Gateway (P1-A1/A2), Passport + Gateway aggregation (P2-A1/A2), full demo seed +
 
    failure-path hardening (P3-A1/A2).
 
@@ -208,7 +208,7 @@ debug logging; and ****[docs/progress-tracker.md](**docs/progress-tracker.md**)*
 
 3. Then Grading + Lifecycle (P1-B1/B2), Matching + Sustainability + real-AI path + tuning
 
-   (P2-B1/B2/B3/B4), finalize (P3-B1/B2).
+   (P2-B1/B2/B3/B4), finalize (P3-B1/B2). Also own the minimal seed (P0-B2) and event-saga observability (P0-B3) in Phase 0 — early backend work that unblocks A and C.
 
 **### Member C (Frontend)**
 
