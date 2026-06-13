@@ -1,81 +1,90 @@
-# Memory — Amazon Second Life AI — Session Restored (2026-06-14)
+# Memory — Amazon Second Life AI — Phase 1 Complete (Member B)
 
 Last updated: 2026-06-14
 
 ## What was built
 
-Nothing new built this session — this was a context restoration session only.
+### This session (Member B — AI & Backend)
 
-**Previous session (P1-A2 complete):**
-- Complete Gateway Service with auth proxy, return management, JWT verification, and event emission
-- Files created in services/gateway/: models.py, schemas.py, session.py, http_client.py, minio_client.py, routes.py, middleware.py, main.py, tests
-- All 5 Gateway endpoints implemented per SERVICE_ENDPOINTS.md
-- 9 test cases passing
+**P0-B1 — AI Wrapper + Mock Mode (built + reviewed + fixed)**
+- `packages/shared-py/shared_py/ai/` — full wrapper with 5 async methods: `analyze_media`, `summarize_damage`, `grade_product`, `decide_lifecycle`, `match_rationale`
+- Deterministic mock seeded from media-key hash (fallback to `reason:category` when empty)
+- Golden-path constants: `GOLDEN_PATH_MEDIA_KEY`, `GOLDEN_PATH_CATEGORY`, `GOLDEN_PATH_REASON`
+- `AI_MODE` + `BEDROCK_MODEL_ID` env config; `correlation_id` kwarg on all methods
+- Pydantic v2 idiomatic schemas (Annotated types, ConfigDict for protected_namespaces)
+- Prompt templates in `ai/prompts/`
+- 22 tests in `tests/test_ai.py`
+
+**P0-B2 — Minimal Seed (`scripts/seed_min.py`)**
+- 6 users (returner + 4 buyers at varying distances + admin), 4 products, 2 returns
+- Deterministic UUIDs via uuid5, idempotent upserts, MinIO placeholders, `--reset` flag
+
+**P0-B3 — Event-Saga Observability**
+- `scripts/events_tail.py` — 5 subcommands: tail, dump, trigger, replay, stats
+- `services/gateway/app/api/debug_routes.py` — GET /debug/events, /dlq, /stats, POST /trigger
+
+**P1-B1 — AI Grading Service (`services/grading/`)**
+- Full service: domain/models.py, domain/service.py (idempotent), domain/schemas.py, db/session.py, api/routes.py (with `?return_id=&product_id=` filters), events/handlers.py (`@subscribe("ReturnSubmitted")` → emit `ProductGraded`), main.py (lifespan), Alembic migration, 10 tests
+- Dockerfile runs `alembic upgrade head` before uvicorn
+
+**P1-B2 — Lifecycle Decision Service (`services/lifecycle/`)**
+- Same pattern as grading: domain layer, db, routes (with `?return_id=&grade_id=` filters), event handler (`@subscribe("ProductGraded")` → emit `LifecycleDecisionCreated`), Alembic, 9 tests
+- Dockerfile fixed: runs `alembic upgrade head && uvicorn ...`
+
+### Other changes
+- `context/problems.md` — rewritten with microservice → problem mapping (✅/🟡/⛔)
+- `docs/ui-tokens.md` — completely reworked to Amazon ecosystem (gold primary, navy header, cream bg, 4px radius)
+- `docs/build-plan.md` — rebalanced A→B (P0-A6/A7 → P0-B2/B3); switched pnpm→npm everywhere
+- All 7 service `pyproject.toml` — added `[tool.hatch.build.targets.wheel] packages = ["app"]`
+- `packages/shared-py/shared_py/schemas/rest_contracts.py` — fixed Pydantic v2 class Config deprecation
+- `README.md` — added Local Testing section; all pnpm→npm
+- `docs/progress-tracker.md` — fixed summary count inconsistencies (now 15 Done / 19 Not started)
 
 ## Decisions made
 
-All architectural decisions from previous sessions remain in place:
-1. Gateway owns Return table (architecture.md §5)
-2. No Alembic migrations for Gateway (minimal DB)
-3. Auth proxy pattern (no duplicate auth logic)
-4. JWT verification middleware (get_current_user_id)
-5. BFF aggregation stub (full implementation in P2)
-6. Media handled as URLs (MinIO client ready)
-7. CORS for frontend (localhost:3000, 3001)
+1. Sustainability service = pure deterministic math (no LLM). Formulas for CO₂/waste/value/credits.
+2. AI wrapper exposes spec-named functions (`analyze_media`, `summarize_damage`, `decide_lifecycle`, `match_rationale`) plus `grade_product` convenience.
+3. Golden-path demo = Zebronics headphones, `GOLDEN_PATH_MEDIA_KEY = "products/golden-path/demo-headphones-001.jpg"`.
+4. UI tokens = Amazon ecosystem (gold #FF9900 primary, navy #232F3E, cream #FEF7ED bg, 4px base radius).
+5. npm over pnpm for frontend.
+6. Hatchling needs `[tool.hatch.build.targets.wheel] packages = ["app"]` in every service pyproject.toml.
+7. All services run `alembic upgrade head` in Dockerfile CMD before starting uvicorn.
+8. List endpoints match SERVICE_ENDPOINTS.md contract filters (grading: `?return_id=&product_id=`, lifecycle: `?return_id=&grade_id=`).
 
 ## Problems solved
 
-No new problems solved this session.
-
-Previous session solved:
-- Auth proxy with httpx AsyncClient
-- JWT verification middleware
-- Event emission after Return creation
-- Return ownership in Gateway DB
-- Test mocks for external dependencies
+1. ImportError running pytest — fix: `pip install -e "packages/shared-py[dev]"` + conftest.py sys.path fallback.
+2. Pydantic `model_version` namespace warning — fix: `ConfigDict(protected_namespaces=())` on GradeResult and GradeResponse.
+3. Pydantic class-based Config deprecation — fix: `model_config = ConfigDict(populate_by_name=True)` in rest_contracts.py.
+4. Docker compose build fails — fix: `[tool.hatch.build.targets.wheel] packages = ["app"]` in all service pyproject.toml.
+5. Empty media_keys same hash — fix: `_media_seed()` fallback hashes `reason:category`.
+6. Lifecycle Dockerfile missing `alembic upgrade head` — saga stalls at step 3. Fixed.
+7. Progress tracker summary counts were stale — fixed to match actual task rows (15/34 done).
 
 ## Current state
 
-**Phase 0:** 11/11 complete (all members)
+**Phase 0: 11/11 ✅** (all members complete, CP0 verified)
+**Phase 1: 4/7 ✅** (A: 2/2 done, B: 2/2 done, C: 0/3 not started)
 
-**Phase 1:** 2/7 complete
-- ✅ P1-A1 User Service — 6 endpoints, 10 tests
-- ✅ P1-A2 Gateway Service — 5 endpoints, 9 tests, auth proxy, ReturnSubmitted events
-- 📋 P1-B1 AI Grading Service — Next for Member B
-- 📋 P1-B2, P1-C1, P1-C2, P1-C3
+Event saga: steps 1–3 wired and producing (`ReturnSubmitted` → `ProductGraded` → `LifecycleDecisionCreated`)
 
-**Services ready:**
-- User Service (Member A) — fully operational
-- Gateway Service (Member A) — fully operational, ready for integration
+CP1 NOT YET VERIFIED — requires C's Auth UI + Return submission UI (P1-C1/C2). Backend side of CP1 is complete.
 
-**Event saga:**
-- ReturnSubmitted event producer implemented and tested in Gateway
-
-**What's ready for integration:**
-- Frontend can call Gateway auth endpoints (P1-C1)
-- Frontend can call Gateway returns endpoints (P1-C2)
-- Grading Service can consume ReturnSubmitted events (P1-B1)
+**Member B's Phase 2 tasks (next):**
+- P2-B1 (Matching Service) — depends on P2-A1 (Passport, not started)
+- P2-B2 (Sustainability Service) — depends on P2-B1
+- P2-B3 (Real AI path) — depends on P1-B1 ✅ + P1-B2 ✅ (ready!)
+- P2-B4 (Score tuning) — depends on P1-B2 ✅ + P2-B2
 
 ## Next session starts with
 
-**For Member A (Full-Stack):**
-- Wait for Member B to complete P1-B1 (Grading) and P1-B2 (Lifecycle)
-- Then proceed with P2-A1 (Passport Service)
-- Alternative: Help test end-to-end integration (User + Gateway services)
+**Option A (unblocked now):** Build **P2-B3 — Real AI path** (`AI_MODE=aws/hybrid`). Dependencies satisfied. Tune prompts in `ai/prompts/`, implement real Bedrock + Rekognition calls in `client.py`, verify graceful fallback.
 
-**For Member B (AI & Backend):**
-- **P1-B1 — AI Grading Service** (NOW UNBLOCKED)
-  - Consume ReturnSubmitted events from Gateway
-  - Call ai_client.grade_product() (P0-B1 complete)
-  - Create Grade entity in slmai_grading DB
-  - Emit ProductGraded event
-  - REST endpoint: GET /grades/{return_id}
-  - Tests (happy path + mock AI)
+**Option B (if A ships P2-A1 first):** Build **P2-B1 — Hyperlocal Matching Service**. Consumes `HyperlocalMatchRequested`, fetches buyer candidates from User service, scores via Haversine + Bedrock rationale, emits `MatchFound`/`NoMatchFound`/`ProductListed`.
 
-**For Member C (Frontend):**
-- **P1-C1 — Auth UI** (NOW UNBLOCKED)
-  - Gateway auth endpoints ready at :8000
+Check progress-tracker.md at session start to see if P2-A1 landed.
 
 ## Open questions
 
-None — all Phase 0 and P1-A1/P1-A2 complete and ready for next phase.
+1. Review issue #1 (hardcoded `product_category="electronics"` and `value_estimate=100.0` in lifecycle handler) — acknowledged as P2-B3/B4 scope, but the demo will show flattened decision variety until fixed.
+2. CP1 verification blocked on Member C's frontend tasks (P1-C1/C2/C3). Backend end-to-end can be tested via `events_tail.py trigger` + checking `/grades/{return_id}` + `/decisions/{return_id}`.
