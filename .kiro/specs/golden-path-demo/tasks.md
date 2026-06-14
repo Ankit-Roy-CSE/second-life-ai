@@ -115,7 +115,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
       `GOLDEN_PATH_MATCH_SCORE` (float)
   - _Requirements: 2.1, 2.3, 3.1, 3.3, 3.4, 4.1, 4.3, 5.1–5.6_
 
-  - [-]* 4.1 Write unit tests for constant types and chain assertions
+  - [x]* 4.1 Write unit tests for constant types and chain assertions
     - Verify `GOLDEN_PATH_VALUE_ESTIMATE > 50.0` with an explicit assertion message
     - Verify `isinstance(GOLDEN_PATH_MATCH_INTERESTS, list)` and all elements are `str`
     - _Requirements: 1.2, 1.5, 1.6_
@@ -145,7 +145,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
       `ruff`, `black` entries
     - _Requirements: 9.1, 9.3_
 
-  - [-]* 6.2 Write property test for Property 1 — Mock determinism
+  - [x]* 6.2 Write property test for Property 1 — Mock determinism
     - `# Feature: golden-path-demo, Property 1: Mock determinism across grade, decision, and match`
     - `@settings(max_examples=100)`
     - `@given(...)` — draw: media keys (`st.text(min_size=1)`), reasons
@@ -162,7 +162,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
       - `match_rationale`: text, key_factors, logistics_benefit equal
     - **Validates: Requirements 2.2, 2.4, 3.2, 4.2**
 
-  - [-]* 6.3 Write property test for Property 2 — Fallback safety and equivalence
+  - [x]* 6.3 Write property test for Property 2 — Fallback safety and equivalence
     - `# Feature: golden-path-demo, Property 2: Fallback safety and equivalence`
     - `@settings(max_examples=100)`
     - `@given(...)` over the same input space as Property 1
@@ -173,7 +173,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
     - Also assert full golden chain completes without raising under induced AWS failure
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
 
-  - [-]* 6.4 Write property test for Property 3 — Proximity logistics benefit
+  - [x]* 6.4 Write property test for Property 3 — Proximity logistics benefit
     - `# Feature: golden-path-demo, Property 3: Proximity logistics benefit`
     - `@settings(max_examples=100)`
     - `@given(distance=st.floats(min_value=0.0, max_value=4.999, allow_nan=False, allow_infinity=False))`
@@ -182,7 +182,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
     - Assert `match.logistics_benefit` is non-empty and `"85%" in match.logistics_benefit`
     - **Validates: Requirement 4.3**
 
-- [ ] 7. Align `scripts/seed_min.py` — import and use `GOLDEN_PATH_VALUE_ESTIMATE`
+- [x] 7. Align `scripts/seed_min.py` — import and use `GOLDEN_PATH_VALUE_ESTIMATE`
   - Open `scripts/seed_min.py`
   - Add `GOLDEN_PATH_VALUE_ESTIMATE` to the existing import from `shared_py.ai.client`:
     ```python
@@ -200,7 +200,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
   - No other changes to `seed_min.py`
   - _Requirements: 8.1, 8.2_
 
-- [ ] 8. Update `docs/progress-tracker.md` — mark P3-B2 done
+- [x] 8. Update `docs/progress-tracker.md` — mark P3-B2 done
   - Locate the `P3-B2` row in the Phase 3 table
   - Set status to `✅ Done`
   - Fill in Notes: e.g. `Golden_Path_Constants added to client.py + re-exported; conftest.py
@@ -211,7 +211,7 @@ No new service code, no new endpoints, no new event types. All work lives in `pa
   - Update `Last updated` header line
   - _Requirements: 8.3_
 
-- [ ] 9. Final checkpoint — ensure the suite is clean
+- [x] 9. Final checkpoint — ensure the suite is clean
   - Run `AI_MODE=mock pytest packages/shared-py/tests/test_golden_path.py -q` (or equivalent
     local invocation) and confirm all tests pass
   - Run `ruff check .` and `black --check .` from `packages/shared-py` and fix any issues

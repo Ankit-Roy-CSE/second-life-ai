@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-15 · **Updated by:** B · **Latest:** P3-B2 complete — Golden-path constants, chain regression test, fallback tests, 3 PBT properties
+**Last updated:** 2026-06-16 · **Updated by:** B · **Latest:** P2-B4 complete — original_price_usd field, lifecycle price wiring, 2-D score/multiplier lookup tables, 3 unit tests
 
 ---
 
@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 8 | 0 | 0 | 1 |
+| Phase 2 — Integration | 9 | 9 | 0 | 0 | 0 |
 | Phase 3 — Dashboard/Polish | 7 | 6 | 0 | 0 | 1 |
-| **Total** | **34** | **32** | **0** | **0** | **2** |
+| **Total** | **34** | **33** | **0** | **0** | **1** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -81,7 +81,7 @@
 | P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | ✅ Done | Consumes `HyperlocalMatchRequested` → fetches buyer candidates from User Service (`GET /users/candidates`) → Haversine scoring + AI rationale → persist MatchRequest/Match/Listing → emit `MatchFound`/`NoMatchFound` + `ProductListed`; `GET /matches?return_id=`, `GET /matches/{id}`, `GET /listings?channel=&status=`, `GET /listings/{id}`; SQLAlchemy models + Alembic migration; idempotent handler; graceful fallback to MARKETPLACE when User Service unavailable; all tests passing | b/matching/p2-b1 |
 | P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | ✅ Done | Consumes `MatchFound`/`NoMatchFound`/`ProductListed`/`PurchaseCompleted` → deterministic CO₂/waste/value/credits calc (calculator.py, no LLM) → persist SustainabilityRecord → emit `SustainabilityUpdated`; `GET /sustainability?return_id=&user_id=`, `GET /sustainability/{id}`, `GET /sustainability/metrics?user_id=`; SQLAlchemy model + Alembic migration; idempotent upsert; lifespan wires DB + 4 event consumers; 15 tests (calculator unit, service upsert/idempotency/metrics, routes 200/404/list) | b/sustainability/p2-b2 |
 | P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | ✅ Done | Fixed blocking bug: Rekognition now reads image bytes from MinIO (`Image={"Bytes":…}`) — no S3 IAM needed; switched `invoke_model` → Bedrock **Converse API** (model-portable); added prompt-injection guard (`_sanitise_user_input`) wrapping return reason in untrusted-data delimiter; added content-moderation rejection (DetectModerationLabels ≥80% blocks grading); one-retry JSON repair on parse failure for all three Bedrock calls; hardened prompts (explicit JSON schema + field constraints + security note); graceful fallback to mock on all AWS failures; `AI_MODE=mock` still passes keyless | b/ai/p2-b3 |
-| P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
+| P2-B4 | B | Value-recovery + sustainability-score tuning | ✅ Done | Added original_price_usd (float|None) to ProductGradedEventData; Lifecycle handler reads real price with 100.0 fallback; mock_decide_lifecycle refactored to 2-D _SUSTAINABILITY_SCORES/_VALUE_MULTIPLIERS lookup tables; golden-path locked (Grade.B/electronics/120.00 → RESELL/72.00/80.0); 3 unit tests added to test_ai.py (regression, backward-compat, zero-value); event_version stays "1.0" | b/ai/p2-b4 |
 | P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | ✅ Done | Implemented DecisionCard and StatCard; integrated into /returns/[id] page. | c/web/p2-c1 |
 | P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
 | P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | ✅ Done | Implemented Avatar, MatchCard, ProductCard. Added /matches and /marketplace pages with mocks. | c/web/p2-c3 |

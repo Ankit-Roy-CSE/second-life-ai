@@ -1,27 +1,27 @@
 """Golden-path chain regression and fallback tests for P3-B2."""
 import asyncio
-import os
 import unittest.mock as mock
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from shared_py.ai import (
-    AIClient,
-    AIMode,
-    GOLDEN_PATH_MEDIA_KEY,
     GOLDEN_PATH_CATEGORY,
-    GOLDEN_PATH_REASON,
-    GOLDEN_PATH_VALUE_ESTIMATE,
-    GOLDEN_PATH_EXPECTED_GRADE,
     GOLDEN_PATH_EXPECTED_ACTION,
-    GOLDEN_PATH_EXPECTED_VALUE_RECOVERY,
+    GOLDEN_PATH_EXPECTED_GRADE,
     GOLDEN_PATH_EXPECTED_SUSTAINABILITY_SCORE,
+    GOLDEN_PATH_EXPECTED_VALUE_RECOVERY,
     GOLDEN_PATH_MATCH_DISTANCE_KM,
     GOLDEN_PATH_MATCH_INTERESTS,
     GOLDEN_PATH_MATCH_SCORE,
+    GOLDEN_PATH_MEDIA_KEY,
+    GOLDEN_PATH_REASON,
+    GOLDEN_PATH_VALUE_ESTIMATE,
+    AIClient,
+    AIMode,
 )
 from shared_py.schemas.enums import Grade, LifecycleAction
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared async helper
@@ -48,19 +48,33 @@ async def _run_golden_chain(client):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def test_golden_path_constants():
-    """Verify all golden-path constants exist, have the correct Python types, and expected values."""
-    assert isinstance(GOLDEN_PATH_VALUE_ESTIMATE, float), "GOLDEN_PATH_VALUE_ESTIMATE must be a float"
-    assert GOLDEN_PATH_VALUE_ESTIMATE > 50.0, "GOLDEN_PATH_VALUE_ESTIMATE must be > 50.0 to trigger RESELL branch"
+    """Verify all golden-path constants exist, have correct Python types, and expected values."""
+    assert isinstance(GOLDEN_PATH_VALUE_ESTIMATE, float), (
+        "GOLDEN_PATH_VALUE_ESTIMATE must be a float"
+    )
+    assert GOLDEN_PATH_VALUE_ESTIMATE > 50.0, (
+        "GOLDEN_PATH_VALUE_ESTIMATE must be > 50.0 to trigger RESELL branch"
+    )
 
     assert GOLDEN_PATH_EXPECTED_GRADE is Grade.B, "GOLDEN_PATH_EXPECTED_GRADE must be Grade.B"
-    assert GOLDEN_PATH_EXPECTED_ACTION is LifecycleAction.RESELL, "GOLDEN_PATH_EXPECTED_ACTION must be LifecycleAction.RESELL"
+    assert GOLDEN_PATH_EXPECTED_ACTION is LifecycleAction.RESELL, (
+        "GOLDEN_PATH_EXPECTED_ACTION must be LifecycleAction.RESELL"
+    )
 
-    assert isinstance(GOLDEN_PATH_EXPECTED_VALUE_RECOVERY, float), "GOLDEN_PATH_EXPECTED_VALUE_RECOVERY must be a float"
-    assert isinstance(GOLDEN_PATH_EXPECTED_SUSTAINABILITY_SCORE, float), "GOLDEN_PATH_EXPECTED_SUSTAINABILITY_SCORE must be a float"
+    assert isinstance(GOLDEN_PATH_EXPECTED_VALUE_RECOVERY, float), (
+        "GOLDEN_PATH_EXPECTED_VALUE_RECOVERY must be a float"
+    )
+    assert isinstance(GOLDEN_PATH_EXPECTED_SUSTAINABILITY_SCORE, float), (
+        "GOLDEN_PATH_EXPECTED_SUSTAINABILITY_SCORE must be a float"
+    )
 
-    assert isinstance(GOLDEN_PATH_MATCH_DISTANCE_KM, float), "GOLDEN_PATH_MATCH_DISTANCE_KM must be a float"
+    assert isinstance(GOLDEN_PATH_MATCH_DISTANCE_KM, float), (
+        "GOLDEN_PATH_MATCH_DISTANCE_KM must be a float"
+    )
 
-    assert isinstance(GOLDEN_PATH_MATCH_INTERESTS, list), "GOLDEN_PATH_MATCH_INTERESTS must be a list"
+    assert isinstance(GOLDEN_PATH_MATCH_INTERESTS, list), (
+        "GOLDEN_PATH_MATCH_INTERESTS must be a list"
+    )
     assert all(isinstance(i, str) for i in GOLDEN_PATH_MATCH_INTERESTS), \
         "All elements of GOLDEN_PATH_MATCH_INTERESTS must be str"
 
@@ -103,7 +117,9 @@ async def test_fallback_init_failure_completes_chain():
         client = AIClient(mode=AIMode.AWS, aws_region="us-east-1")
         grade, decision, match = await _run_golden_chain(client)
     assert client.mode == AIMode.MOCK, "fallback: mode should flip to MOCK on init failure"
-    assert grade.grade == GOLDEN_PATH_EXPECTED_GRADE, "fallback: grade should match golden-path grade"
+    assert grade.grade == GOLDEN_PATH_EXPECTED_GRADE, (
+        "fallback: grade should match golden-path grade"
+    )
 
 
 class _StubBotoClient:
@@ -161,9 +177,6 @@ async def test_fallback_invocation_failure(operation):
 # Property-based tests (hypothesis)
 # ─────────────────────────────────────────────────────────────────────────────
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
-
 
 # Feature: golden-path-demo, Property 1: Mock determinism across grade, decision, and match
 @settings(max_examples=100)
@@ -184,7 +197,9 @@ from hypothesis import strategies as st
     ),
     score=st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
 )
-def test_prop_mock_determinism(media_key, reason, category, grade, value, distance, interests, score):
+def test_prop_mock_determinism(
+    media_key, reason, category, grade, value, distance, interests, score
+):
     """Property 1: mock mode returns identical outputs on two calls with the same inputs."""
     client = AIClient(mode=AIMode.MOCK)
 
@@ -230,7 +245,9 @@ def test_prop_mock_determinism(media_key, reason, category, grade, value, distan
     ),
     score=st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
 )
-def test_prop_fallback_safety_equivalence(media_key, reason, category, grade, value, distance, interests, score):
+def test_prop_fallback_safety_equivalence(
+    media_key, reason, category, grade, value, distance, interests, score
+):
     """Property 2: AWS-mode with init failure returns same result as mock and raises no exception.
 
     Validates: Requirements 6.1, 6.2, 6.3, 6.4
