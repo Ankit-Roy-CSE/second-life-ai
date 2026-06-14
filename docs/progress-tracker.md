@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P2-A2 complete — Gateway BFF aggregation + PurchaseCompleted shipped.
+**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P3-A1 complete — Demo narrative seed (8 returns, all lifecycle actions) + Gateway dashboard aggregation endpoints shipped.
 
 ---
 
@@ -29,8 +29,8 @@
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
 | Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
-| Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **22** | **0** | **0** | **12** |
+| Phase 3 — Dashboard/Polish | 7 | 1 | 0 | 0 | 6 |
+| **Total** | **34** | **23** | **0** | **0** | **11** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -94,7 +94,7 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-| P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | 📋 Not started | — | — |
+| P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | ✅ Done | scripts/seed.py: full demo narrative with 8 returns (all lifecycle actions), pre-seeded grades/decisions/passports/matches/listings/sustainability; Gateway dashboard endpoints: GET /dashboard/sustainability/metrics + GET /dashboard/sustainability/records; ServiceClient methods for sustainability aggregation; 9 tests for dashboard routes | a/seed-dashboard/p3-a1 |
 | P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | 📋 Not started | — | — |
 | P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | 📋 Not started | — | — |
 | P3-B2 | B | Golden-path demo product + AI fallback test | 📋 Not started | — | — |

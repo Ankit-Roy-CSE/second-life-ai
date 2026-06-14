@@ -347,6 +347,95 @@ class ServiceClient:
                 message=f"Matching Service unreachable: {e}",
             ) from e
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Sustainability Dashboard methods (BFF read-model for dashboard)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    async def get_sustainability_metrics(
+        self,
+        user_id: Optional[str],
+        requesting_user_id: str,
+    ) -> dict[str, Any]:
+        """
+        Fetch aggregated sustainability metrics from Sustainability Service.
+
+        Args:
+            user_id: Optional filter by user_id
+            requesting_user_id: User making the request (for auth)
+
+        Returns:
+            Metrics dict with co2_avoided_kg, waste_diverted_kg, value_recovered, green_credits
+
+        Raises:
+            AppError(502) on ConnectError
+        """
+        url = f"{settings.sustainability_service_url}/sustainability/metrics"
+        headers = {
+            "X-User-Id": requesting_user_id,
+        }
+        params = {}
+        if user_id is not None:
+            params["user_id"] = user_id
+
+        try:
+            return await self.call_service("GET", url, params=params, headers=headers)
+        except AppError:
+            raise
+        except httpx.RequestError as e:
+            raise AppError(
+                status_code=502,
+                code="upstream_unreachable",
+                message=f"Sustainability Service unreachable: {e}",
+            ) from e
+
+    async def list_sustainability_records(
+        self,
+        user_id: Optional[str],
+        return_id: Optional[str],
+        limit: int,
+        offset: int,
+        requesting_user_id: str,
+    ) -> dict[str, Any]:
+        """
+        Fetch sustainability records list from Sustainability Service.
+
+        Args:
+            user_id: Optional filter by user_id
+            return_id: Optional filter by return_id
+            limit: Items per page
+            offset: Offset from start
+            requesting_user_id: User making the request (for auth)
+
+        Returns:
+            Paginated response with items[] and total
+
+        Raises:
+            AppError(502) on ConnectError
+        """
+        url = f"{settings.sustainability_service_url}/sustainability"
+        headers = {
+            "X-User-Id": requesting_user_id,
+        }
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+        if user_id is not None:
+            params["user_id"] = user_id
+        if return_id is not None:
+            params["return_id"] = return_id
+
+        try:
+            return await self.call_service("GET", url, params=params, headers=headers)
+        except AppError:
+            raise
+        except httpx.RequestError as e:
+            raise AppError(
+                status_code=502,
+                code="upstream_unreachable",
+                message=f"Sustainability Service unreachable: {e}",
+            ) from e
+
 
 # Singleton instance
 service_client = ServiceClient()
