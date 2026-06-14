@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ReturnCreateRequest(BaseModel):
     """
     Request body for POST /returns.
-    
+
     Creates a new return, uploads media to MinIO, emits ReturnSubmitted event.
     """
 
@@ -33,7 +33,7 @@ class ReturnCreateRequest(BaseModel):
 class ReturnResponse(BaseModel):
     """
     Response model for return-related endpoints.
-    
+
     Used by POST /returns, GET /returns, GET /returns/{id}.
     """
 
@@ -44,9 +44,7 @@ class ReturnResponse(BaseModel):
     user_id: str = Field(..., description="UUID of the User")
     reason: str = Field(..., description="Return reason")
     status: str = Field(..., description="ReturnStatus enum value")
-    media: list[str] = Field(
-        default_factory=list, description="S3/MinIO object keys for media"
-    )
+    media: list[str] = Field(default_factory=list, description="S3/MinIO object keys for media")
     created_at: str = Field(..., description="ISO-8601 UTC timestamp")
 
 
@@ -64,7 +62,7 @@ class ReturnListResponse(BaseModel):
 class ReturnDetailResponse(BaseModel):
     """
     Response for GET /returns/{id} — BFF aggregation.
-    
+
     Combines Return + Grade + Decision + Passport + Matches.
     """
 
@@ -86,12 +84,8 @@ class ProxyRegisterRequest(BaseModel):
     email: str = Field(..., description="User email")
     password: str = Field(..., min_length=8, description="Password (min 8 chars)")
     display_name: str = Field(..., min_length=1, description="User's display name")
-    location: Optional[dict] = Field(
-        None, description="Location {lat, lng, city}"
-    )
-    interests: list[str] = Field(
-        default_factory=list, description="Product categories of interest"
-    )
+    location: Optional[dict] = Field(None, description="Location {lat, lng, city}")
+    interests: list[str] = Field(default_factory=list, description="Product categories of interest")
 
 
 class ProxyLoginRequest(BaseModel):
@@ -99,3 +93,32 @@ class ProxyLoginRequest(BaseModel):
 
     email: str = Field(..., description="User email")
     password: str = Field(..., description="User password")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Purchase DTOs
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class PurchaseRequest(BaseModel):
+    """
+    Request body for POST /purchase.
+
+    Triggers a PurchaseCompleted event that advances the saga to Sustainability.
+    """
+
+    listing_id: str = Field(..., description="UUID of the listing being purchased")
+    buyer_user_id: str = Field(..., description="Must match JWT user_id")
+    price: float = Field(..., gt=0, description="Purchase price (must be > 0)")
+
+
+class PurchaseResponse(BaseModel):
+    """
+    Response body for POST /purchase (HTTP 201).
+    """
+
+    listing_id: str
+    buyer_user_id: str
+    price: float
+    event_id: str
+    correlation_id: str

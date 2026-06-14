@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-14 · **Updated by:** C · **Latest:** P1-C3 complete — Checkpoint CP1 is now complete!
+**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P2-A2 complete — Gateway BFF aggregation + PurchaseCompleted shipped.
 
 ---
 
@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
+| Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **18** | **0** | **0** | **16** |
+| **Total** | **34** | **22** | **0** | **0** | **12** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -76,15 +76,15 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-| P2-A1 | A | Product Passport Service (`PassportCreated`, `HyperlocalMatchRequested`) | 📋 Not started | — | — |
-| P2-A2 | A | Gateway aggregation + `PurchaseCompleted` | 📋 Not started | — | — |
-| P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | 📋 Not started | — | — |
-| P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | 📋 Not started | — | — |
+| P2-A1 | A | Product Passport Service (`PassportCreated`, `HyperlocalMatchRequested`) | ✅ Done | Consumes ProductGraded + LifecycleDecisionCreated → builds Passport (Product + Passport models); emits PassportCreated + HyperlocalMatchRequested; GET /passports/{id} + GET /passports/by-return/{return_id}; SQLAlchemy Product + Passport models + Alembic migration; idempotent event handlers; lifespan wires DB + Redis consumers; 11 tests passing | a/passport/p2-a1 |
+| P2-A2 | A | Gateway aggregation + `PurchaseCompleted` | ✅ Done | BFF aggregation: GET /returns/{id} fans out concurrently (asyncio.gather) to Grading/Lifecycle/Passport/Matching with partial-availability fallback (null/[] on upstream 404/unreachable); proxy routes GET /passports/{id} + GET /matches?return_id=; POST /purchase (listing lookup → correlation_id → PurchaseCompleted event; buyer_user_id locked to JWT); GET /marketplace (channel=MARKETPLACE&status=ACTIVE, 3-attempt back-off retry); ServiceClient extended with 7 upstream methods + _safe_call + _marketplace_with_retry; PurchaseRequest/PurchaseResponse schemas; 21 tests (happy + error paths + X-User-Id forwarding + 5 hypothesis property tests) all passing | a/gateway/p2-a2 |
+| P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | ✅ Done | Consumes `HyperlocalMatchRequested` → fetches buyer candidates from User Service (`GET /users/candidates`) → Haversine scoring + AI rationale → persist MatchRequest/Match/Listing → emit `MatchFound`/`NoMatchFound` + `ProductListed`; `GET /matches?return_id=`, `GET /matches/{id}`, `GET /listings?channel=&status=`, `GET /listings/{id}`; SQLAlchemy models + Alembic migration; idempotent handler; graceful fallback to MARKETPLACE when User Service unavailable; all tests passing | b/matching/p2-b1 |
+| P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | ✅ Done | Consumes `MatchFound`/`NoMatchFound`/`ProductListed`/`PurchaseCompleted` → deterministic CO₂/waste/value/credits calc (calculator.py, no LLM) → persist SustainabilityRecord → emit `SustainabilityUpdated`; `GET /sustainability?return_id=&user_id=`, `GET /sustainability/{id}`, `GET /sustainability/metrics?user_id=`; SQLAlchemy model + Alembic migration; idempotent upsert; lifespan wires DB + 4 event consumers; 15 tests (calculator unit, service upsert/idempotency/metrics, routes 200/404/list) | b/sustainability/p2-b2 |
 | P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | 📋 Not started | — | — |
 | P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
-| P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | 📋 Not started | — | — |
-| P2-C2 | C | Passport UI (`PassportTimeline` + history) | 📋 Not started | — | — |
-| P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | 📋 Not started | — | — |
+| P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | ✅ Done | Implemented DecisionCard and StatCard; integrated into /returns/[id] page. | c/web/p2-c1 |
+| P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
+| P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | ✅ Done | Implemented Avatar, MatchCard, ProductCard. Added /matches and /marketplace pages with mocks. | c/web/p2-c3 |
 
 **Checkpoint CP2:** ⬜ Not verified — _full 10-event saga runs; each step visible in UI._
 
@@ -115,13 +115,13 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | 1 | `ReturnSubmitted` | gateway | grading | ✅ |
 | 2 | `ProductGraded` | grading | lifecycle, passport | ✅ |
 | 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | ✅ |
-| 4 | `PassportCreated` | passport | matching | 📋 |
-| 5 | `HyperlocalMatchRequested` | passport | matching | 📋 |
-| 6 | `MatchFound` | matching | sustainability, passport | 📋 |
-| 7 | `NoMatchFound` | matching | sustainability | 📋 |
-| 8 | `ProductListed` | matching | sustainability | 📋 |
-| 9 | `PurchaseCompleted` | gateway/matching | sustainability, passport | 📋 |
-| 10 | `SustainabilityUpdated` | sustainability | gateway (read-model) | 📋 |
+| 4 | `PassportCreated` | passport | matching | ✅ |
+| 5 | `HyperlocalMatchRequested` | passport | matching | ✅ |
+| 6 | `MatchFound` | matching | sustainability, passport | ✅ |
+| 7 | `NoMatchFound` | matching | sustainability | ✅ |
+| 8 | `ProductListed` | matching | sustainability | ✅ |
+| 9 | `PurchaseCompleted` | gateway/matching | sustainability, passport | ✅ |
+| 10 | `SustainabilityUpdated` | sustainability | gateway (read-model) | ✅ |
 
 ---
 
@@ -133,9 +133,9 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | user | A | ✅ | ✅ | ✅ | n/a | ✅ | ✅ |
 | grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | lifecycle | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
-| matching | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
-| sustainability | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
+| passport | A | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| matching | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| sustainability | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | web | C | ✅ | n/a | ✅ | n/a | 📋 | 🚧 |
 
 ---
@@ -147,7 +147,8 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 
 | Date | Raised by | Item | Type | Status |
 |------|-----------|------|------|--------|
-| _—_ | _—_ | _No blockers yet._ | — | — |
+| 2026-06-14 | B | Service-wiring gotchas hit on `docker compose up` (sustainability + matching): (1) Alembic must use Docker host `postgres` + read `DATABASE_URL`, not `localhost`; (2) only one Alembic head per service (dupe `001`/`0001` → "multiple heads"); (3) `add_ready_check(name, fn=...)` must return `"ok"`/raise, not bool. Documented in code-standards §2.4a. | Decision | ✅ Resolved |
+| _—_ | _—_ | _No other blockers._ | — | — |
 
 ---
 
