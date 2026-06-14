@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 1 | 0 | 0 | 8 |
+| Phase 2 — Integration | 9 | 2 | 0 | 0 | 7 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **19** | **0** | **0** | **15** |
+| **Total** | **34** | **20** | **0** | **0** | **14** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -78,7 +78,7 @@
 |---------|-------|------|--------|-------|------|
 | P2-A1 | A | Product Passport Service (`PassportCreated`, `HyperlocalMatchRequested`) | ✅ Done | Consumes ProductGraded + LifecycleDecisionCreated → builds Passport (Product + Passport models); emits PassportCreated + HyperlocalMatchRequested; GET /passports/{id} + GET /passports/by-return/{return_id}; SQLAlchemy Product + Passport models + Alembic migration; idempotent event handlers; lifespan wires DB + Redis consumers; 11 tests passing | a/passport/p2-a1 |
 | P2-A2 | A | Gateway aggregation + `PurchaseCompleted` | 📋 Not started | — | — |
-| P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | 📋 Not started | — | — |
+| P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | ✅ Done | Consumes `HyperlocalMatchRequested` → fetches buyer candidates from User Service (`GET /users/candidates`) → Haversine scoring + AI rationale → persist MatchRequest/Match/Listing → emit `MatchFound`/`NoMatchFound` + `ProductListed`; `GET /matches?return_id=`, `GET /matches/{id}`, `GET /listings?channel=&status=`, `GET /listings/{id}`; SQLAlchemy models + Alembic migration; idempotent handler; graceful fallback to MARKETPLACE when User Service unavailable; all tests passing | b/matching/p2-b1 |
 | P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | 📋 Not started | — | — |
 | P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | 📋 Not started | — | — |
 | P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
@@ -117,9 +117,9 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | ✅ |
 | 4 | `PassportCreated` | passport | matching | ✅ |
 | 5 | `HyperlocalMatchRequested` | passport | matching | ✅ |
-| 6 | `MatchFound` | matching | sustainability, passport | 📋 |
-| 7 | `NoMatchFound` | matching | sustainability | 📋 |
-| 8 | `ProductListed` | matching | sustainability | 📋 |
+| 6 | `MatchFound` | matching | sustainability, passport | ✅ |
+| 7 | `NoMatchFound` | matching | sustainability | ✅ |
+| 8 | `ProductListed` | matching | sustainability | ✅ |
 | 9 | `PurchaseCompleted` | gateway/matching | sustainability, passport | 📋 |
 | 10 | `SustainabilityUpdated` | sustainability | gateway (read-model) | 📋 |
 
@@ -134,7 +134,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | lifecycle | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | passport | A | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| matching | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
+| matching | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | sustainability | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | web | C | ✅ | n/a | ✅ | n/a | 📋 | 🚧 |
 
