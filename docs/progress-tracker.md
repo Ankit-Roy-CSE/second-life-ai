@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 3 | 0 | 0 | 6 |
+| Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **21** | **0** | **0** | **13** |
+| **Total** | **34** | **22** | **0** | **0** | **12** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -84,7 +84,7 @@
 | P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
 | P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | ✅ Done | Implemented DecisionCard and StatCard; integrated into /returns/[id] page. | c/web/p2-c1 |
 | P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
-| P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | 📋 Not started | — | — |
+| P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | ✅ Done | Implemented Avatar, MatchCard, ProductCard. Added /matches and /marketplace pages with mocks. | c/web/p2-c3 |
 
 **Checkpoint CP2:** ⬜ Not verified — _full 10-event saga runs; each step visible in UI._
 

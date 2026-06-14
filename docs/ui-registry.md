@@ -139,8 +139,23 @@ Strictly uses semantic design tokens for grades. Circular (`rounded-full`) for i
 - **Purpose:** Hover/focus hints (Radix). **Tokens:** `popover`, `z-popover`.
 
 ### Avatar
-- **Status:** 📋 Planned · **Path:** components/ui/Avatar.tsx · **Owner:** C
-- **Purpose:** User/buyer avatar. **Tokens:** `muted`, `rounded-full`.
+
+File: apps/web/src/components/ui/Avatar.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
+- **Owner:** C
+- **Purpose:** User/buyer avatar, displays image or initials.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-muted        |
+| Border radius    | rounded-full    |
+| Text — primary   | text-muted-foreground (fallback) |
+| Spacing          | h-10 w-10 (default base) |
+
+**Pattern notes:**
+Follows Radix UI patterns. The fallback explicitly uses `bg-muted text-muted-foreground` to gracefully handle missing avatars or initials while matching the design system's muted color palette.
 
 ---
 
@@ -269,20 +284,52 @@ Last updated: 2026-06-14
 Uses standard structural tailwind classes (like `ml-3`) rather than arbitrary pixels. Event timestamps use `font-mono`. The vertical line is created using a subtle border-colored gradient.
 
 ### MatchCard
-- **Status:** 📋 Planned
-- **Path:** components/features/MatchCard.tsx
+
+File: apps/web/src/components/features/MatchCard.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** A hyperlocal buyer match (score, savings, distance).
-- **Props:** `buyer`, `score: number`, `estimatedSavings: number`, `distanceKm: number`.
-- **Depends on:** Card, Avatar, Progress/score ring, Badge.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card         |
+| Border           | hover:border-primary/50 |
+| Border radius    | rounded-lg (Card default) |
+| Text — primary   | text-lg font-semibold (name), text-base font-bold (savings value) |
+| Text — secondary | text-sm text-muted-foreground (distance), text-xs text-muted-foreground font-semibold uppercase tracking-wider (label) |
+| Spacing          | p-6 (CardContent) |
+| Hover state      | hover:border-primary/50 hover:shadow-md transition-all |
+| Shadow           | hover:shadow-md |
+| Accent usage     | text-primary (score), bg-success/10 text-success (dollar icon), Badge variant="success" |
+
+**Pattern notes:**
+Implements interactive card hover states (`hover:border-primary/50 hover:shadow-md`). The savings label strictly matches the dashboard uppercase tracking-wider aesthetic for secondary labels. The score uses a `primary` Progress bar, and successful elements (dollars, badges) leverage the `success` semantic token.
 
 ### ProductCard
-- **Status:** 📋 Planned
-- **Path:** components/features/ProductCard.tsx
+
+File: apps/web/src/components/features/ProductCard.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Marketplace listing tile (image, title, grade, price).
-- **Props:** `product`, `grade`, `price`, `channel`.
-- **Depends on:** Card, GradeBadge, next/image.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card, bg-muted (image placeholder) |
+| Border           | hover:border-primary/50, border-b border-border (image wrapper) |
+| Border radius    | rounded-lg (Card default) |
+| Text — primary   | text-lg font-semibold line-clamp-2 (title), text-xl font-bold (price) |
+| Text — secondary | text-sm text-muted-foreground font-medium (shipping status) |
+| Spacing          | p-5 flex flex-col flex-1 (CardContent), pt-4 border-t (footer) |
+| Hover state      | hover:border-primary/50 hover:shadow-md transition-all |
+| Shadow           | hover:shadow-md (card), shadow-sm (floating badges) |
+| Accent usage     | Badge variant="info" (local pickup) |
+
+**Pattern notes:**
+Employs standard Next.js `<Image />` component with `fill` and `object-cover` within a `relative aspect-square` wrapper for perfectly proportioned, performant images. Floating badges (`GradeBadge`, `Badge`) utilize `shadow-sm` for separation from the underlying image. Consistent interactive hover states match `MatchCard`.
 
 ### EmptyState
 - **Status:** ✅ Built
@@ -350,8 +397,8 @@ The NavBar anchors the top of the interface. It strongly uses the `secondary` br
 
 | Layer | Built | In progress | Planned |
 |-------|-------|-------------|---------|
-| Primitives | 12 | 0 | 2 |
-| Composite/feature | 8 | 0 | 3 |
+| Primitives | 13 | 0 | 1 |
+| Composite/feature | 10 | 0 | 1 |
 | Layout | 1 | 0 | 2 |
 
 > Update the counts and individual statuses as components are built. The first agent to build
