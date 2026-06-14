@@ -1,5 +1,5 @@
-import { ReturnResponse, ReturnDetailResponse, DashboardMetricsResponse, LoginRequest, LoginResponse, RegisterRequest, ReturnCreateRequest, PassportResponse } from "../../types/api";
-import { ReturnStatus, Grade, LifecycleAction } from "../../types/enums";
+import { ReturnResponse, ReturnDetailResponse, DashboardMetricsResponse, LoginRequest, LoginResponse, RegisterRequest, ReturnCreateRequest, PassportResponse, MatchResponse, ListingResponse } from "../../types/api";
+import { ReturnStatus, Grade, LifecycleAction, ListingChannel, ListingStatus } from "../../types/enums";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false"; // Default to true in Phase 0
@@ -42,6 +42,23 @@ export const apiClient = {
     if (USE_MOCKS) return MOCKS.passport;
     const res = await fetch(`${API_BASE_URL}/passports/${id}`);
     if (!res.ok) throw new Error("Failed to fetch passport details");
+    return res.json();
+  },
+
+  async getMatches(returnId: string): Promise<MatchResponse[]> {
+    if (USE_MOCKS) return MOCKS.matches;
+    const res = await fetch(`${API_BASE_URL}/matches?return_id=${returnId}`);
+    if (!res.ok) throw new Error("Failed to fetch matches");
+    return res.json();
+  },
+
+  async getMarketplace(channel?: ListingChannel, status?: ListingStatus): Promise<ListingResponse[]> {
+    if (USE_MOCKS) return MOCKS.marketplace;
+    let url = `${API_BASE_URL}/marketplace?`;
+    if (channel) url += `channel=${channel}&`;
+    if (status) url += `status=${status}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch marketplace listings");
     return res.json();
   },
 
@@ -171,6 +188,72 @@ const MOCKS = {
     ],
     created_at: new Date().toISOString()
   },
+  matches: [
+    {
+      id: "match_1",
+      match_request_id: "req_1",
+      buyer_user_id: "buyer_1",
+      buyer_display_name: "Alice J.",
+      score: 92,
+      estimated_savings: 15.50,
+      distance_km: 2.4,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "match_2",
+      match_request_id: "req_1",
+      buyer_user_id: "buyer_2",
+      buyer_display_name: "Bob S.",
+      score: 85,
+      estimated_savings: 12.00,
+      distance_km: 5.1,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "match_3",
+      match_request_id: "req_1",
+      buyer_user_id: "buyer_3",
+      buyer_display_name: "Charlie D.",
+      score: 65,
+      estimated_savings: 5.20,
+      distance_km: 12.8,
+      created_at: new Date().toISOString()
+    }
+  ],
+  marketplace: [
+    {
+      id: "list_1",
+      product_id: "prod_1",
+      price: 249.99,
+      channel: ListingChannel.MARKETPLACE,
+      status: ListingStatus.ACTIVE,
+      product: {
+        id: "prod_1",
+        owner_user_id: "user_sys",
+        category: "electronics",
+        title: "Sony WH-1000XM4 Wireless Headphones",
+        attributes: {},
+        created_at: new Date().toISOString()
+      },
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "list_2",
+      product_id: "prod_2",
+      price: 89.99,
+      channel: ListingChannel.HYPERLOCAL,
+      status: ListingStatus.ACTIVE,
+      product: {
+        id: "prod_2",
+        owner_user_id: "user_sys",
+        category: "electronics",
+        title: "Logitech MX Master 3 Mouse",
+        attributes: {},
+        created_at: new Date().toISOString()
+      },
+      created_at: new Date().toISOString()
+    }
+  ],
   login: {
     access_token: "mock-jwt-token",
     user: {
