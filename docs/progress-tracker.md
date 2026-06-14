@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
-| Phase 3 — Dashboard/Polish | 7 | 2 | 0 | 0 | 5 |
-| **Total** | **34** | **24** | **0** | **0** | **10** |
+| Phase 2 — Integration | 9 | 7 | 0 | 0 | 2 |
+| Phase 3 — Dashboard/Polish | 7 | 3 | 0 | 0 | 4 |
+| **Total** | **34** | **28** | **0** | **0** | **6** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 

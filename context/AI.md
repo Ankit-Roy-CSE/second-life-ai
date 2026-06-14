@@ -1,4 +1,4 @@
-# AI Implementation — AZ Second Life AI
+# AI Implementation — Amazon Second Life AI
 
 >**The complete plan for the AI layer**: how AWS Bedrock + Rekognition run the grading,
 > decision, and matching workflow; how to set the services up; and the high-level spec of the
