@@ -25,13 +25,13 @@ export function GradePanel({ grade, confidence, damageSummary, defects }: GradeP
           <h3 className="font-semibold text-lg">AI Inspection Results</h3>
         </div>
       </div>
-      <CardContent className="p-6 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-start gap-8">
-          
-          <div className="flex flex-col items-center justify-center space-y-2 p-6 bg-muted rounded-lg border border-border flex-shrink-0 min-w-[200px]">
-            <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Condition Grade</span>
-            <GradeBadge grade={grade} size="lg" showLabel={false} className="h-20 w-20 text-4xl" />
-            <span className="font-medium text-foreground mt-2 text-lg">
+      <CardContent className="p-6 space-y-5">
+        {/* Row 1: Grade + Confidence side by side */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col items-center justify-center space-y-2 p-5 bg-muted rounded-lg border border-border">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Condition Grade</span>
+            <GradeBadge grade={grade} size="lg" showLabel={false} className="h-16 w-16 text-3xl" />
+            <span className="font-medium text-foreground text-sm">
               {grade === Grade.A && "Like New"}
               {grade === Grade.B && "Good"}
               {grade === Grade.C && "Fair"}
@@ -39,45 +39,48 @@ export function GradePanel({ grade, confidence, damageSummary, defects }: GradeP
             </span>
           </div>
 
-          <div className="flex-1 space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm font-medium">
-                <span className="text-muted-foreground">AI Confidence</span>
-                <span className="text-foreground">{confidencePercent}%</span>
-              </div>
-              <Progress value={confidencePercent} className="h-2" />
+          <div className="flex flex-col justify-center space-y-3 p-5 bg-muted rounded-lg border border-border">
+            <div className="flex justify-between text-sm font-medium">
+              <span className="text-muted-foreground">AI Confidence</span>
+              <span className="text-foreground font-semibold">{confidencePercent}%</span>
             </div>
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Damage Summary</h4>
-              <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md border border-border/50">
-                {damageSummary}
-              </p>
-            </div>
-
-            {defects && defects.length > 0 ? (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Detected Defects</h4>
-                <ul className="space-y-2">
-                  {defects.map((defect, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                      <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                      <span>{defect}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                 <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Detected Defects</h4>
-                 <div className="flex items-center gap-2 text-sm text-success">
-                   <CheckCircle2 className="h-4 w-4" />
-                   <span>No visible defects detected.</span>
-                 </div>
-              </div>
-            )}
+            <Progress value={confidencePercent} className="h-2.5" />
+            <span className="text-xs text-muted-foreground">
+              {confidencePercent >= 90 ? "High confidence" : confidencePercent >= 75 ? "Moderate confidence" : "Low confidence"}
+            </span>
           </div>
         </div>
+
+        {/* Row 2: Damage Summary — full width */}
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Damage Summary</h4>
+          <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md border border-border/50 leading-relaxed">
+            {damageSummary}
+          </p>
+        </div>
+
+        {/* Row 3: Detected Defects — full width */}
+        {defects && defects.length > 0 ? (
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detected Defects</h4>
+            <ul className="space-y-1.5">
+              {defects.map((defect, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                  <span>{defect}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detected Defects</h4>
+            <div className="flex items-center gap-2 text-sm text-success">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>No visible defects detected.</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
