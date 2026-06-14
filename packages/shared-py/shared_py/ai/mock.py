@@ -23,6 +23,38 @@ from .schemas import (
     MediaLabels,
 )
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Decision table: sustainability scores and value-recovery multipliers
+# Keyed on (grade, action) tuples. Used by mock_decide_lifecycle.
+# Golden-path invariant: (Grade.B, LifecycleAction.RESELL) = 80.0 / 0.60
+# ─────────────────────────────────────────────────────────────────────────────
+
+_SUSTAINABILITY_SCORES: dict[tuple[Grade, LifecycleAction], float] = {
+    (Grade.A, LifecycleAction.RESELL):      88.0,
+    (Grade.A, LifecycleAction.HYPERLOCAL):  90.0,
+    (Grade.B, LifecycleAction.RESELL):      80.0,   # golden-path locked
+    (Grade.B, LifecycleAction.REFURBISH):   75.0,
+    (Grade.B, LifecycleAction.HYPERLOCAL):  87.0,
+    (Grade.C, LifecycleAction.REFURBISH):   70.0,
+    (Grade.C, LifecycleAction.DONATE):      65.0,
+    (Grade.D, LifecycleAction.RECYCLE):     50.0,
+    (Grade.D, LifecycleAction.DONATE):      55.0,
+}
+_SUSTAINABILITY_DEFAULT = 60.0
+
+_VALUE_MULTIPLIERS: dict[tuple[Grade, LifecycleAction], float] = {
+    (Grade.A, LifecycleAction.RESELL):      0.75,
+    (Grade.A, LifecycleAction.HYPERLOCAL):  0.65,
+    (Grade.B, LifecycleAction.RESELL):      0.60,   # golden-path locked: 120×0.60=72.00
+    (Grade.B, LifecycleAction.REFURBISH):   0.50,
+    (Grade.B, LifecycleAction.HYPERLOCAL):  0.65,
+    (Grade.C, LifecycleAction.REFURBISH):   0.40,
+    (Grade.C, LifecycleAction.DONATE):      0.10,
+    (Grade.D, LifecycleAction.RECYCLE):     0.05,
+    (Grade.D, LifecycleAction.DONATE):      0.05,
+}
+_VALUE_MULTIPLIER_DEFAULT = 0.10
+
 
 def _hash_input(value: Any) -> int:
     """
@@ -218,48 +250,46 @@ def mock_decide_lifecycle(
     if grade == Grade.A:
         action = LifecycleAction.RESELL
         rationale = f"Grade A {product_category} is in excellent condition and can be resold as-is with minimal processing."
-        value_recovery = value_estimate * 0.75  # 75% of original
-        sustainability_score = 85.0
     elif grade == Grade.B:
         if value_estimate > 50:
             action = LifecycleAction.RESELL
             rationale = f"Grade B {product_category} shows minor wear but remains highly valuable. Resell with accurate condition disclosure."
-            value_recovery = value_estimate * 0.60
-            sustainability_score = 80.0
         else:
             action = LifecycleAction.REFURBISH
             rationale = f"Grade B {product_category} can be refurbished cost-effectively to increase resale value."
-            value_recovery = value_estimate * 0.50
-            sustainability_score = 75.0
     elif grade == Grade.C:
         if value_estimate > 100:
             action = LifecycleAction.REFURBISH
             rationale = f"Grade C {product_category} requires refurbishment but has sufficient value to justify repair costs."
-            value_recovery = value_estimate * 0.40
-            sustainability_score = 70.0
         else:
             action = LifecycleAction.DONATE
             rationale = f"Grade C {product_category} has low resale value. Donation maximizes social and environmental impact."
-            value_recovery = value_estimate * 0.10
-            sustainability_score = 65.0
     else:  # Grade D
         if product_category.lower() in ["electronics", "appliances"]:
             action = LifecycleAction.RECYCLE
             rationale = f"Grade D {product_category} is severely damaged. Recycle to recover materials and prevent e-waste."
-            value_recovery = value_estimate * 0.05
-            sustainability_score = 50.0
         else:
             action = LifecycleAction.DONATE
             rationale = f"Grade D {product_category} can still serve basic function. Donate for charitable reuse."
-            value_recovery = value_estimate * 0.05
-            sustainability_score = 55.0
+
+    sustainability_score = _SUSTAINABILITY_SCORES.get((grade, action), _SUSTAINABILITY_DEFAULT)
+    multiplier = _VALUE_MULTIPLIERS.get((grade, action), _VALUE_MULTIPLIER_DEFAULT)
+    value_recovery = 0.0 if value_estimate == 0.0 else value_estimate * multiplier
 
     # Add hyperlocal override for high sustainability items
     seed = _hash_input(f"{grade}{product_category}")
     if seed % 5 == 0 and grade in (Grade.A, Grade.B):
         action = LifecycleAction.HYPERLOCAL
-        rationale = f"Hyperlocal match opportunity detected. {product_category} can be transferred to nearby buyer, avoiding reverse logistics."
-        sustainability_score += 10.0
+        rationale = (
+            f"Hyperlocal match opportunity detected. {product_category} can be "
+            f"transferred to nearby buyer, avoiding reverse logistics."
+        )
+        sustainability_score = _SUSTAINABILITY_SCORES.get(
+            (grade, action), _SUSTAINABILITY_DEFAULT
+        )
+        sustainability_score = min(sustainability_score, 100.0)
+        multiplier = _VALUE_MULTIPLIERS.get((grade, action), _VALUE_MULTIPLIER_DEFAULT)
+        value_recovery = 0.0 if value_estimate == 0.0 else value_estimate * multiplier
 
     confidence = 0.90 if grade in (Grade.A, Grade.D) else 0.82
 

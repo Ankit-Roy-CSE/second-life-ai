@@ -54,13 +54,16 @@ async def handle_product_graded(envelope: EventEnvelope) -> None:
     async with db_module._session_factory() as db:
         service = LifecycleService(db)
 
+        _price = data.original_price_usd
+        value_estimate = _price if (_price is not None and _price > 0) else 100.0
+
         decision = await service.decide_lifecycle(
             return_id=data.return_id,
             grade_id=data.grade_id,
             grade=data.grade,
             # Default category and value until enrichment pipeline (P2-B3)
             product_category="electronics",
-            value_estimate=100.0,
+            value_estimate=value_estimate,
             correlation_id=correlation_id,
         )
 

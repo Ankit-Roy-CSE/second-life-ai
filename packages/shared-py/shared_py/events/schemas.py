@@ -81,6 +81,10 @@ class ProductGradedEventData(BaseModel):
     defects: list[str] = Field(
         default_factory=list, description="List of detected defect labels"
     )
+    original_price_usd: float | None = Field(
+        default=None,
+        description="Catalogue/purchase price in USD; None when not available",
+    )
 
 
 class LifecycleDecisionCreatedEventData(BaseModel):

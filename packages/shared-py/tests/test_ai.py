@@ -464,5 +464,62 @@ class TestGracefulDegradation:
         assert r1.grade == r2.grade  # correlation_id doesn't affect output
 
 
+def test_schema_backward_compat_no_price_field():
+    """Old ProductGraded events without original_price_usd must still deserialize cleanly."""
+    from shared_py.events.schemas import ProductGradedEventData
+
+    # A minimal valid payload that mimics an old event without the new field
+    payload = {
+        "return_id": "a1b2c3d4-0000-0000-0000-000000000001",
+        "grade_id": "a1b2c3d4-0000-0000-0000-000000000002",
+        "product_id": "a1b2c3d4-0000-0000-0000-000000000003",
+        "grade": "B",
+        "confidence": 0.82,
+        "damage_summary": "Minor wear",
+        "defects": [],
+        # NOTE: original_price_usd is intentionally absent
+    }
+
+    result = ProductGradedEventData.model_validate(payload)
+
+    assert result.original_price_usd is None, (
+        "old events without original_price_usd must deserialize with None"
+    )
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+def test_zero_value_estimate():
+    """mock_decide_lifecycle with value_estimate=0.0 must return value_recovery_estimate=0.0 without exception."""
+    from shared_py.ai.mock import mock_decide_lifecycle
+    from shared_py.schemas.enums import Grade
+
+    for grade in [Grade.A, Grade.B, Grade.C, Grade.D]:
+        result = mock_decide_lifecycle(grade, "electronics", 0.0)
+        assert result.value_recovery_estimate == 0.0, (
+            f"zero value_estimate must give zero value_recovery for grade {grade}"
+        )
+        # sustainability_score should still be valid
+        assert 0.0 <= result.sustainability_score <= 100.0
+
+
+def test_golden_path_decision_regression():
+    """Golden-path: Grade B + electronics + 120.00 → RESELL, value_recovery=72.00, score=80.0."""
+    from shared_py.ai.mock import mock_decide_lifecycle
+    from shared_py.schemas.enums import Grade, LifecycleAction
+
+    result = mock_decide_lifecycle(Grade.B, "electronics", 120.00)
+
+    assert result.action == LifecycleAction.RESELL, (
+        f"golden-path decision link: expected RESELL, got {result.action}"
+    )
+    assert result.value_recovery_estimate == 72.00, (
+        f"golden-path value_recovery link: expected 72.00, got {result.value_recovery_estimate}"
+    )
+    assert result.sustainability_score == 80.0, (
+        f"golden-path sustainability_score link: expected 80.0, got {result.sustainability_score}"
+    )
+    assert result.confidence > 0, "confidence must be positive"
+    assert result.rationale and len(result.rationale) > 0, "rationale must be non-empty"

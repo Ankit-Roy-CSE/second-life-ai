@@ -69,7 +69,12 @@ except ImportError:
     print("[seed_min] Python 3.10+ required (asyncio)")
     sys.exit(1)
 
-from shared_py.ai.client import GOLDEN_PATH_MEDIA_KEY, GOLDEN_PATH_CATEGORY, GOLDEN_PATH_REASON
+from shared_py.ai.client import (
+    GOLDEN_PATH_MEDIA_KEY,
+    GOLDEN_PATH_CATEGORY,
+    GOLDEN_PATH_REASON,
+    GOLDEN_PATH_VALUE_ESTIMATE,
+)
 from shared_py.schemas.enums import ReturnStatus
 
 # ---------------------------------------------------------------------------
@@ -234,7 +239,7 @@ PRODUCTS: list[dict[str, Any]] = [
             "connectivity": "Wired",
             "driver_size": "40mm",
             "weight_grams": 320,
-            "original_price_usd": 45.00,
+            "original_price_usd": GOLDEN_PATH_VALUE_ESTIMATE,
         },
         # This media key is the golden-path constant — grading service will hash it
         # to produce the reproducible Grade B result for the demo
@@ -529,6 +534,7 @@ def print_manifest() -> None:
     print(f"  GOLDEN_PATH_MEDIA_KEY = {GOLDEN_PATH_MEDIA_KEY}")
     print(f"  GOLDEN_PATH_CATEGORY  = {GOLDEN_PATH_CATEGORY}")
     print(f"  GOLDEN_PATH_REASON    = {GOLDEN_PATH_REASON}")
+    print(f"  GOLDEN_PATH_VALUE_ESTIMATE = {GOLDEN_PATH_VALUE_ESTIMATE}")
 
     print("\nMINIO BUCKET")
     print(f"  bucket : {S3_BUCKET}")
