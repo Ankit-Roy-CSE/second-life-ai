@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
-| Phase 3 — Dashboard/Polish | 7 | 2 | 0 | 0 | 5 |
-| **Total** | **34** | **24** | **0** | **0** | **10** |
+| Phase 2 — Integration | 9 | 7 | 0 | 0 | 2 |
+| Phase 3 — Dashboard/Polish | 7 | 5 | 0 | 0 | 2 |
+| **Total** | **34** | **30** | **0** | **0** | **4** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -94,7 +94,6 @@
 
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
-
 | P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | ✅ Done | scripts/seed.py: full demo narrative with 8 returns (all lifecycle actions), pre-seeded grades/decisions/passports/matches/listings/sustainability; Gateway dashboard endpoints: GET /dashboard/sustainability/metrics + GET /dashboard/sustainability/records; ServiceClient methods for sustainability aggregation; 9 tests for dashboard routes | a/seed-dashboard/p3-a1 |
 | P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | ✅ Done | scripts/smoke_test.py: comprehensive E2E validation with 6 phases (health checks, auth, return submission, saga completion, dashboard, failure-path testing); failure-path tests inject malformed events → verify DLQ landing + FAILED status handling; .env.example: comprehensive documentation with section headers, inline explanations, production hardening checklist; docs/hardening-checklist.md: 10-section production readiness validation; scripts/README.md: updated with smoke_test.py documentation; all tests pass with --verbose flag | a/e2e-hardening/p3-a2 |
 | P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | ✅ Done | Reshaped `GET /sustainability/metrics` to the binding contract `{ totals: {co2_avoided_kg, waste_diverted_kg, value_recovered, green_credits, returns_processed}, breakdown: [{action, count, co2_avoided_kg, waste_diverted_kg, value_recovered}] }` — matches frontend `SustainabilityMetricsResponse` (api.ts) and SERVICE_ENDPOINTS.md; added `lifecycle_action` column (migration 002) so breakdown groups by action; green-credit accrual via calculator; metrics aggregation + per-action grouping; updated tests (+ breakdown grouping test). Gateway `/sustainability/dashboard` wrapper (recent_returns, top_categories) remains A's P3-A1. | b/sustainability/p3-b1 |
