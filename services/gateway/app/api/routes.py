@@ -469,3 +469,85 @@ async def get_marketplace(
 
     body = await service_client._marketplace_with_retry(params, user_id)
     return JSONResponse(content=body)
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Sustainability Dashboard Read-Model (BFF aggregation for dashboard)
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/dashboard/sustainability/metrics",
+    status_code=status.HTTP_200_OK,
+    tags=["dashboard"],
+    summary="Get aggregated sustainability metrics (BFF for dashboard)",
+)
+async def get_sustainability_metrics(
+    user_id_filter: Optional[str] = Query(None, alias="user_id", description="Filter by user_id"),
+    current_user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    Get aggregated sustainability dashboard metrics.
+
+    Aggregates data from Sustainability Service:
+    - Total CO₂ avoided (kg)
+    - Total waste diverted (kg)
+    - Total value recovered (USD)
+    - Total green credits earned
+
+    Query params:
+    - user_id: Optional filter to show metrics for a specific user
+
+    Called by: Frontend Sustainability Dashboard
+    """
+    # Require authentication for dashboard access
+    current_user_id = require_auth(current_user_id)
+
+    # Proxy to Sustainability Service metrics endpoint
+    metrics = await service_client.get_sustainability_metrics(
+        user_id=user_id_filter,
+        requesting_user_id=current_user_id,
+    )
+
+    return JSONResponse(content=metrics)
+
+
+@router.get(
+    "/dashboard/sustainability/records",
+    status_code=status.HTTP_200_OK,
+    tags=["dashboard"],
+    summary="List sustainability records with pagination (BFF for dashboard)",
+)
+async def list_sustainability_records(
+    user_id_filter: Optional[str] = Query(None, alias="user_id", description="Filter by user_id"),
+    return_id_filter: Optional[str] = Query(None, alias="return_id", description="Filter by return_id"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    List sustainability records for the dashboard.
+
+    Provides detailed history of individual sustainability impacts.
+
+    Query params:
+    - user_id: Filter by user
+    - return_id: Filter by return
+    - limit: Items per page (default 20)
+    - offset: Offset from start (default 0)
+
+    Called by: Frontend Sustainability Dashboard (detailed view)
+    """
+    # Require authentication
+    current_user_id = require_auth(current_user_id)
+
+    # Proxy to Sustainability Service list endpoint
+    records = await service_client.list_sustainability_records(
+        user_id=user_id_filter,
+        return_id=return_id_filter,
+        limit=limit,
+        offset=offset,
+        requesting_user_id=current_user_id,
+    )
+
+    return JSONResponse(content=records)
