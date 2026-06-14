@@ -96,10 +96,10 @@ export function FileUpload({
           onChange={handleFileSelect}
           disabled={disabled}
         />
-        <UploadCloud className="mb-4 h-10 w-10 text-muted-foreground" />
-        <h4 className="text-lg font-semibold text-foreground">
+        <UploadCloud className="mb-4 h-10 w-10 text-muted-foreground" aria-hidden={true} />
+        <h3 className="text-lg font-semibold text-foreground">
           Drag & drop media here
-        </h4>
+        </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Or click to browse (max {maxFiles} files)
         </p>
@@ -133,7 +133,7 @@ export function FileUpload({
                   className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 hover:bg-danger"
                   aria-label="Remove file"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" aria-hidden={true} />
                 </button>
               )}
               <div className="truncate bg-background p-1 text-center text-xs text-muted-foreground">

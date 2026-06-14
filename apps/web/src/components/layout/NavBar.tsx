@@ -12,6 +12,7 @@ export function NavBar() {
         <nav className="flex items-center gap-6">
           <Link href="/returns" className="text-sm font-medium text-white hover:text-primary">Returns</Link>
           <Link href="/matches" className="text-sm font-medium text-white hover:text-primary">Matches</Link>
+          <Link href="/marketplace" className="text-sm font-medium text-white hover:text-primary">Marketplace</Link>
           <Link href="/sustainability" className="text-sm font-medium text-white hover:text-primary">Dashboard</Link>
           
           {/* Green Credit Balance */}
@@ -21,7 +22,7 @@ export function NavBar() {
           </div>
 
           {/* User Menu / Avatar */}
-          <Avatar className="h-8 w-8 ml-2 cursor-pointer border border-border">
+          <Avatar aria-label="User menu" className="h-8 w-8 ml-2 cursor-pointer border border-border">
             <AvatarImage src="" alt="User" />
             <AvatarFallback>U</AvatarFallback>
           </Avatar>

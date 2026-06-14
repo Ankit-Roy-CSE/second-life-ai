@@ -1,9 +1,8 @@
 "use client"
 
-import React, { useEffect, useState, Suspense } from "react"
+import React, { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
-import { MatchResponse } from "../../../types/api"
+import { useMatches } from "@/hooks/use-matches"
 import { MatchCard } from "@/components/features/MatchCard"
 import { PageHeader } from "@/components/features/PageHeader"
 import { EmptyState } from "@/components/features/EmptyState"
@@ -14,33 +13,13 @@ import { Search } from "lucide-react"
 function MatchesContent() {
   const searchParams = useSearchParams()
   const returnId = searchParams.get("return_id") || "ret_123" // Fallback to mock ID for demo
-  
-  const [matches, setMatches] = useState<MatchResponse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        const data = await apiClient.getMatches(returnId)
-        setMatches(data)
-      } catch (err: unknown) {
-        const error = err as Error
-        setError(error.message || "Failed to load matches.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchMatches()
-  }, [returnId])
+  const { data: matches = [], isLoading, isError, error, refetch } = useMatches(returnId)
 
   return (
     <div className="container mx-auto py-8 max-w-screen-xl px-4 md:px-6">
-      <PageHeader 
-        title="Hyperlocal Matches" 
+      <PageHeader
+        title="Hyperlocal Matches"
         subtitle={`Showing nearby buyers interested in this product (Return ID: ${returnId})`}
         className="mb-8"
       />
@@ -51,18 +30,21 @@ function MatchesContent() {
             <Skeleton key={i} className="h-48 w-full rounded-xl" />
           ))}
         </div>
-      ) : error ? (
-        <ErrorState message={error} onRetry={() => window.location.reload()} />
+      ) : isError ? (
+        <ErrorState
+          message={error?.message ?? "Failed to load matches."}
+          onRetry={() => refetch()}
+        />
       ) : matches.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={Search}
-          title="No matches found" 
-          description="We couldn't find any nearby buyers for this product right now." 
+          title="No matches found"
+          description="We couldn't find any nearby buyers for this product right now."
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in-50 duration-500">
           {matches.map((match) => (
-            <MatchCard 
+            <MatchCard
               key={match.id}
               buyer={{ name: match.buyer_display_name || "Unknown Buyer" }}
               score={match.score}
