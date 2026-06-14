@@ -343,8 +343,10 @@ async def seed_demo_passports() -> None:
     conn = await asyncpg.connect(DB_URLS["passport"])
     try:
         for r in DEMO_RETURNS:
+            # Deterministic passport ID derived from return_id — reused by listings
+            passport_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"slmai.passport.{r['id']}"))
             passport_record = {
-                "id": str(uuid.uuid4()),
+                "id": passport_id,
                 "product_id": r["product_id"],
                 "return_id": r["id"],
                 "current_grade": r["expected_grade"].value,
@@ -356,7 +358,7 @@ async def seed_demo_passports() -> None:
                 "updated_at": NOW.isoformat(),
             }
             await _upsert(conn, "passports", passport_record)
-            print(f"  [passport-db] Seeded passport for return {r['id'][:8]}...")
+            print(f"  [passport-db] Seeded passport {passport_id[:8]}... for return {r['id'][:8]}...")
     except Exception as e:
         print(f"  [passport-db] Error seeding passports: {e}")
     finally:
@@ -427,7 +429,7 @@ async def seed_demo_listings() -> None:
             listing_record = {
                 "id": str(uuid.uuid4()),
                 "product_id": r["product_id"],
-                "passport_id": str(uuid.uuid4()),  # Would link to real passport
+                "passport_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"slmai.passport.{r['id']}")),
                 "return_id": r["id"],
                 "price": base_price,
                 "channel": channel,

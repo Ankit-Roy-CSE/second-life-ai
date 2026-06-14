@@ -1,24 +1,27 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { PageHeader } from "@/components/features/PageHeader"
 import { GradePanel } from "@/components/features/GradePanel"
 import { DecisionCard } from "@/components/features/DecisionCard"
 import { EmptyState } from "@/components/features/EmptyState"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { ErrorState } from "@/components/features/ErrorState"
-import { ClipboardCheck } from "lucide-react"
+import { Button } from "@/components/ui/Button"
+import { ClipboardCheck, CheckCircle2 } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
 import { ReturnDetailResponse } from "../../../../types/api"
 
 export default function ReturnDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const returnId = params.id as string
 
   const [returnDetail, setReturnDetail] = useState<ReturnDetailResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [accepting, setAccepting] = useState(false)
 
   const fetchDetail = React.useCallback(async () => {
     if (!returnId) return
@@ -38,6 +41,13 @@ export default function ReturnDetailPage() {
   useEffect(() => {
     fetchDetail()
   }, [fetchDetail])
+
+  const handleAcceptDecision = async () => {
+    setAccepting(true)
+    // Navigate to the passport page — the saga has already created the passport
+    // in the background via events (PassportCreated + HyperlocalMatchRequested)
+    router.push(`/passport/${returnId}`)
+  }
 
   if (loading) {
     return (
@@ -79,12 +89,26 @@ export default function ReturnDetailPage() {
       )}
 
       {returnDetail?.decision && (
-        <DecisionCard 
-          action={returnDetail.decision.action}
-          rationale={returnDetail.decision.rationale}
-          valueRecovery={returnDetail.decision.value_recovery_estimate}
-          sustainabilityScore={returnDetail.decision.sustainability_score}
-        />
+        <>
+          <DecisionCard 
+            action={returnDetail.decision.action}
+            rationale={returnDetail.decision.rationale}
+            valueRecovery={returnDetail.decision.value_recovery_estimate}
+            sustainabilityScore={returnDetail.decision.sustainability_score}
+          />
+
+          {/* Accept button — user agrees with the AI decision, triggers navigation to passport/matching */}
+          <div className="flex justify-center">
+            <Button
+              onClick={handleAcceptDecision}
+              disabled={accepting}
+              className="gap-2 px-6 py-3 text-base"
+            >
+              <CheckCircle2 className="h-5 w-5" />
+              {accepting ? "Processing..." : "Agree & Proceed"}
+            </Button>
+          </div>
+        </>
       )}
     </div>
   )

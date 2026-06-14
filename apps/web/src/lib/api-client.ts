@@ -40,7 +40,69 @@ export const apiClient = {
   },
 
   async getPassport(id: string): Promise<PassportResponse> {
-    if (USE_MOCKS) return MOCKS.passport;
+    if (USE_MOCKS) {
+      // Return distinct passport data based on ID
+      const mockPassports: Record<string, PassportResponse> = {
+        "pass_123": {
+          id: "pass_123",
+          product_id: "prod_1",
+          return_id: "ret_123",
+          current_grade: Grade.A,
+          grade_confidence: 0.95,
+          lifecycle_action: LifecycleAction.RESELL,
+          value_recovery_estimate: 249.99,
+          sustainability_score: 95,
+          ownership_history: [
+            { owner_id: "user_1", start_date: "2024-01-10T10:00:00Z", end_date: new Date().toISOString() }
+          ],
+          refurb_history: [],
+          sustainability: {
+            co2_avoided_kg: 15.4,
+            waste_diverted_kg: 2.1
+          },
+          status: "ACTIVE",
+          timeline: [
+            { event: "Product Manufactured", timestamp: "2023-11-01T08:00:00Z", details: { location: "Factory A" } },
+            { event: "Original Purchase", timestamp: "2024-01-10T10:00:00Z", details: { channel: "Amazon.com" } },
+            { event: "Return Submitted", timestamp: new Date(Date.now() - 86400000).toISOString(), details: { reason: "Defective" } },
+            { event: "AI Grading Completed", timestamp: new Date(Date.now() - 43200000).toISOString(), details: { grade: Grade.A, confidence: "95%" } },
+            { event: "Lifecycle Decision Made", timestamp: new Date(Date.now() - 3600000).toISOString(), details: { action: "RESELL", value_recovery: "$249.99" } },
+            { event: "Digital Passport Created", timestamp: new Date().toISOString(), details: { passport_id: "pass_123" } }
+          ],
+          created_at: new Date().toISOString()
+        },
+        "pass_456": {
+          id: "pass_456",
+          product_id: "prod_2",
+          return_id: "ret_456",
+          current_grade: Grade.B,
+          grade_confidence: 0.88,
+          lifecycle_action: LifecycleAction.HYPERLOCAL,
+          value_recovery_estimate: 89.99,
+          sustainability_score: 82,
+          ownership_history: [
+            { owner_id: "user_2", start_date: "2024-02-15T14:30:00Z", end_date: new Date().toISOString() }
+          ],
+          refurb_history: [],
+          sustainability: {
+            co2_avoided_kg: 8.2,
+            waste_diverted_kg: 1.5
+          },
+          status: "ACTIVE",
+          timeline: [
+            { event: "Product Manufactured", timestamp: "2023-10-15T09:00:00Z", details: { location: "Factory B" } },
+            { event: "Original Purchase", timestamp: "2024-02-15T14:30:00Z", details: { channel: "Amazon.com" } },
+            { event: "Return Submitted", timestamp: new Date(Date.now() - 72000000).toISOString(), details: { reason: "Wrong item" } },
+            { event: "AI Grading Completed", timestamp: new Date(Date.now() - 36000000).toISOString(), details: { grade: Grade.B, confidence: "88%" } },
+            { event: "Lifecycle Decision Made", timestamp: new Date(Date.now() - 7200000).toISOString(), details: { action: "HYPERLOCAL", value_recovery: "$89.99" } },
+            { event: "Digital Passport Created", timestamp: new Date().toISOString(), details: { passport_id: "pass_456" } }
+          ],
+          created_at: new Date().toISOString()
+        }
+      };
+      
+      return mockPassports[id] || mockPassports["pass_123"]; // Fallback to pass_123 if ID not found
+    }
     const res = await fetch(`${API_BASE_URL}/passports/${id}`);
     if (!res.ok) throw new Error("Failed to fetch passport details");
     return res.json();
@@ -60,7 +122,9 @@ export const apiClient = {
     if (status) url += `status=${status}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch marketplace listings");
-    return res.json();
+    const body = await res.json();
+    // Gateway returns { items: [...], total: N } from matching service
+    return body.items ?? body;
   },
 
   async createReturn(data: ReturnCreateRequest): Promise<ReturnResponse> {
@@ -181,6 +245,10 @@ const MOCKS = {
     product_id: "prod_1",
     return_id: "ret_123",
     current_grade: Grade.A,
+    grade_confidence: 0.95,
+    lifecycle_action: LifecycleAction.RESELL,
+    value_recovery_estimate: 249.99,
+    sustainability_score: 95,
     ownership_history: [
       { owner_id: "user_1", start_date: "2024-01-10T10:00:00Z", end_date: new Date().toISOString() }
     ],
@@ -236,6 +304,7 @@ const MOCKS = {
     {
       id: "list_1",
       product_id: "prod_1",
+      passport_id: "pass_123",
       price: 249.99,
       channel: ListingChannel.MARKETPLACE,
       status: ListingStatus.ACTIVE,
@@ -244,6 +313,7 @@ const MOCKS = {
         owner_user_id: "user_sys",
         category: "electronics",
         title: "Sony WH-1000XM4 Wireless Headphones",
+        image_url: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&h=400&fit=crop",
         attributes: {},
         created_at: new Date().toISOString()
       },
@@ -252,6 +322,7 @@ const MOCKS = {
     {
       id: "list_2",
       product_id: "prod_2",
+      passport_id: "pass_456",
       price: 89.99,
       channel: ListingChannel.HYPERLOCAL,
       status: ListingStatus.ACTIVE,
@@ -260,6 +331,7 @@ const MOCKS = {
         owner_user_id: "user_sys",
         category: "electronics",
         title: "Logitech MX Master 3 Mouse",
+        image_url: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop",
         attributes: {},
         created_at: new Date().toISOString()
       },

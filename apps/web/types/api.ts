@@ -172,6 +172,11 @@ export interface PassportResponse {
   product_id: string;
   return_id: string;
   current_grade: Grade;
+  grade_confidence?: number;
+  damage_summary?: string;
+  lifecycle_action?: string;
+  value_recovery_estimate?: number;
+  sustainability_score?: number;
   ownership_history: any[];
   refurb_history: any[];
   sustainability: Record<string, any>;

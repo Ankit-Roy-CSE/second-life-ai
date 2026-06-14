@@ -150,6 +150,7 @@ async def handle_lifecycle_decision_created(envelope: EventEnvelope) -> None:
             return_id=data.return_id,
             product_id=passport.product_id,
             category=category,
+            passport_id=passport.id,
             location=location,
         ).model_dump(mode="json"),
         redis_url=settings.redis_url,

@@ -63,8 +63,8 @@ async def handle_hyperlocal_match_requested(envelope: EventEnvelope) -> None:
     lat: float = float(location.get("lat", 0.0))
     lng: float = float(location.get("lng", 0.0))
 
-    # Passport ID may be forwarded in future; use placeholder for now.
-    passport_id: str = str(location.get("passport_id", _DEFAULT_PASSPORT_ID))
+    # Passport ID is forwarded from the passport service via the event payload
+    passport_id: str = data.passport_id or _DEFAULT_PASSPORT_ID
     price: float = float(location.get("price", _DEFAULT_PRICE))
 
     async with db_module._session_factory() as db:

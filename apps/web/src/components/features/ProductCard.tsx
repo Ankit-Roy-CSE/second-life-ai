@@ -1,5 +1,6 @@
 import React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/Card"
 import { GradeBadge } from "@/components/ui/GradeBadge"
 import { Badge } from "@/components/ui/Badge"
@@ -15,13 +16,15 @@ export interface ProductCardProps {
   grade: Grade;
   price: number;
   channel: ListingChannel;
+  /** Link destination — typically `/passport/{id}`. When provided, the card becomes clickable. */
+  href?: string;
 }
 
-export function ProductCard({ product, grade, price, channel }: ProductCardProps) {
+export function ProductCard({ product, grade, price, channel, href }: ProductCardProps) {
   const isHyperlocal = channel === ListingChannel.HYPERLOCAL;
 
-  return (
-    <Card className="overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:shadow-md">
+  const cardContent = (
+    <Card className="overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:shadow-md cursor-pointer">
       <div className="relative aspect-square w-full bg-muted border-b border-border">
         {product.image ? (
           <Image src={product.image} alt={product.alt ?? product.title} fill className="object-cover" />
@@ -51,5 +54,11 @@ export function ProductCard({ product, grade, price, channel }: ProductCardProps
         </div>
       </CardContent>
     </Card>
-  )
+  );
+
+  if (href) {
+    return <Link href={href} className="block">{cardContent}</Link>;
+  }
+
+  return cardContent;
 }

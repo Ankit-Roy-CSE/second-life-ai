@@ -16,11 +16,11 @@ export function PassportTimeline({ events }: PassportTimelineProps) {
   }
 
   return (
-    <div className="relative pl-6 space-y-8 before:absolute before:inset-0 before:ml-3 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+    <div className="relative pl-6 space-y-8 before:absolute before:inset-0 before:ml-3 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-foreground/30">
       {events.map((entry, index) => (
         <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
           {/* Marker */}
-          <div className="flex items-center justify-center w-6 h-6 rounded-full border-4 border-background bg-primary absolute left-0 md:left-1/2 -translate-x-1/2 translate-y-1 z-10" />
+          <div className="flex items-center justify-center w-6 h-6 rounded-full border-4 border-background bg-foreground absolute left-0 md:left-1/2 -translate-x-1/2 translate-y-1 z-10" />
           
           <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-2.5rem)] bg-card border border-border p-4 rounded-lg shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2">

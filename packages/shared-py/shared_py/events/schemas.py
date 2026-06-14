@@ -135,6 +135,10 @@ class HyperlocalMatchRequestedEventData(BaseModel):
     return_id: str = Field(..., description="UUID of the Return")
     product_id: str = Field(..., description="UUID of the Product")
     category: str = Field(..., description="Product category for matching")
+    passport_id: str | None = Field(
+        default=None,
+        description="UUID of the Passport; used by matching to link listings back to the passport",
+    )
     location: dict[str, Any] = Field(
         ..., description="Location dict with lat, lng, city fields"
     )
