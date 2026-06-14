@@ -80,6 +80,8 @@ export default function RegisterPage() {
               <Input
                 id="displayName"
                 placeholder="John Doe"
+                aria-invalid={!!errors.displayName}
+                aria-describedby={errors.displayName ? "displayName-error" : undefined}
                 {...register("displayName")}
               />
               {errors.displayName && (
@@ -94,6 +96,8 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="m@example.com"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 {...register("email")}
               />
               {errors.email && (
@@ -107,6 +111,8 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "password-error" : undefined}
                 {...register("password")}
               />
               {errors.password && (

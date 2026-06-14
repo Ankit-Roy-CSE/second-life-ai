@@ -6,10 +6,12 @@ import { PageHeader } from "@/components/features/PageHeader"
 import { PassportTimeline } from "@/components/features/PassportTimeline"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { ErrorState } from "@/components/features/ErrorState"
+import { EmptyState } from "@/components/features/EmptyState"
 import { apiClient } from "@/lib/api-client"
 import { PassportResponse } from "../../../../types/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { GradeBadge } from "@/components/ui/GradeBadge"
+import { FileSearch } from "lucide-react"
 
 export default function PassportPage() {
   const params = useParams()
@@ -56,7 +58,18 @@ export default function PassportPage() {
     )
   }
 
-  if (!passport) return null
+  if (!passport) {
+    return (
+      <div className="container mx-auto py-8 max-w-screen-xl px-4 md:px-6">
+        <PageHeader title="Digital Product Passport" subtitle="" />
+        <EmptyState
+          icon={FileSearch}
+          title="No passport found"
+          description="We couldn't find passport details for this product."
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto py-8 max-w-screen-xl px-4 md:px-6 space-y-8">

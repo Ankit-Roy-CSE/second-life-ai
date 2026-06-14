@@ -366,6 +366,10 @@ Employs standard Next.js `<Image />` component with `fill` and `object-cover` wi
 - **Purpose:** Top nav + content container; wraps all routes. **Tokens:** `header-height`, `container-max`, `z-sticky`.
 
 ### NavBar
+
+File: apps/web/src/components/layout/NavBar.tsx
+Last updated: 2026-06-15
+
 - **Status:** ✅ Built · **Path:** components/layout/NavBar.tsx · **Owner:** C
 - **Purpose:** Brand, primary nav links, user menu, green-credit balance. **Depends on:** Button, Avatar.
 
@@ -380,6 +384,8 @@ Employs standard Next.js `<Image />` component with `fill` and `object-cover` wi
 
 **Pattern notes:**
 The NavBar anchors the top of the interface. It strongly uses the `secondary` brand color (Navy) to ground the design. Links hover to `primary` (Gold) to provide high-contrast interactive states.
+
+Navigation links (in order): **Returns · Matches · Marketplace · Dashboard**. The Avatar trigger carries `aria-label="User menu"` for screen-reader accessibility.
 
 ### Sidebar (optional)
 - **Status:** 📋 Planned · **Path:** components/layout/Sidebar.tsx · **Owner:** C
