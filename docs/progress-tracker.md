@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P3-A1 complete — Demo narrative seed (8 returns, all lifecycle actions) + Gateway dashboard aggregation endpoints shipped.
+**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P3-A2 complete — E2E smoke test with failure-path testing (DLQ verification, FAILED status handling) + comprehensive .env.example documentation + hardening checklist.
 
 ---
 
@@ -29,8 +29,8 @@
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
 | Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
-| Phase 3 — Dashboard/Polish | 7 | 1 | 0 | 0 | 6 |
-| **Total** | **34** | **23** | **0** | **0** | **11** |
+| Phase 3 — Dashboard/Polish | 7 | 2 | 0 | 0 | 5 |
+| **Total** | **34** | **24** | **0** | **0** | **10** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -95,7 +95,7 @@
 | Task ID | Owner | Task | Status | Notes | Link |
 |---------|-------|------|--------|-------|------|
 | P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | ✅ Done | scripts/seed.py: full demo narrative with 8 returns (all lifecycle actions), pre-seeded grades/decisions/passports/matches/listings/sustainability; Gateway dashboard endpoints: GET /dashboard/sustainability/metrics + GET /dashboard/sustainability/records; ServiceClient methods for sustainability aggregation; 9 tests for dashboard routes | a/seed-dashboard/p3-a1 |
-| P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | 📋 Not started | — | — |
+| P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | ✅ Done | scripts/smoke_test.py: comprehensive E2E validation with 6 phases (health checks, auth, return submission, saga completion, dashboard, failure-path testing); failure-path tests inject malformed events → verify DLQ landing + FAILED status handling; .env.example: comprehensive documentation with section headers, inline explanations, production hardening checklist; docs/hardening-checklist.md: 10-section production readiness validation; scripts/README.md: updated with smoke_test.py documentation; all tests pass with --verbose flag | a/e2e-hardening/p3-a2 |
 | P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | 📋 Not started | — | — |
 | P3-B2 | B | Golden-path demo product + AI fallback test | 📋 Not started | — | — |
 | P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | 📋 Not started | — | — |

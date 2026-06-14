@@ -125,6 +125,60 @@ python scripts/events_tail.py dlq
 
 ---
 
+## Testing Scripts
+
+### `smoke_test.py` — E2E Smoke Test
+
+**Owner:** A (P3-A2)
+
+Comprehensive end-to-end smoke test validating the entire system health and functionality.
+
+**What it tests:**
+1. **Service Health:** All 7 services respond to `/health` and `/ready`
+2. **Authentication:** User registration and login flow
+3. **Return Submission:** Creating products and submitting returns
+4. **Event Saga:** Full 10-event choreography completes within 30s
+5. **Dashboard:** BFF aggregation endpoints respond correctly
+6. **Failure Paths:** Malformed events land in DLQ after retries
+7. **FAILED Status:** Returns that fail move to FAILED status without stalling
+
+**Usage:**
+```bash
+# Full smoke test (all phases)
+python scripts/smoke_test.py
+
+# With verbose output
+python scripts/smoke_test.py --verbose
+
+# Skip failure-path tests (faster, for CI)
+python scripts/smoke_test.py --skip-failure-tests
+```
+
+**Exit Codes:**
+- `0` = All tests passed (CI-friendly)
+- `1` = One or more tests failed
+
+**When to use:**
+- Before committing major changes
+- Before demo/production deployment
+- CI/CD pipeline validation
+- Verifying docker compose stack is healthy
+- Testing failure handling and DLQ
+
+**Phases:**
+1. Service health checks (7 services)
+2. Auth flow (register + login)
+3. Return submission (happy path)
+4. Event saga completion (30s timeout)
+5. Dashboard endpoints
+6. Failure-path testing (optional, adds ~15s)
+
+**Typical run time:**
+- Without failure tests: ~35-40 seconds
+- With failure tests: ~50-55 seconds
+
+---
+
 ## Service Requirements
 
 All seeding scripts require:
