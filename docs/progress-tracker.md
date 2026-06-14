@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-15 · **Updated by:** C · **Latest:** P3-C2 complete — Polish + states + a11y pass (NavBar Marketplace link, TanStack Query hooks, EmptyState coverage, ARIA wiring, heading fixes).
+**Last updated:** 2026-06-15 · **Updated by:** B · **Latest:** P3-B2 complete — Golden-path constants, chain regression test, fallback tests, 3 PBT properties
 
 ---
 
@@ -28,9 +28,9 @@
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
-| Phase 2 — Integration | 9 | 7 | 0 | 0 | 2 |
-| Phase 3 — Dashboard/Polish | 7 | 5 | 0 | 0 | 2 |
-| **Total** | **34** | **30** | **0** | **0** | **4** |
+| Phase 2 — Integration | 9 | 8 | 0 | 0 | 1 |
+| Phase 3 — Dashboard/Polish | 7 | 6 | 0 | 0 | 1 |
+| **Total** | **34** | **32** | **0** | **0** | **2** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -80,7 +80,7 @@
 | P2-A2 | A | Gateway aggregation + `PurchaseCompleted` | ✅ Done | BFF aggregation: GET /returns/{id} fans out concurrently (asyncio.gather) to Grading/Lifecycle/Passport/Matching with partial-availability fallback (null/[] on upstream 404/unreachable); proxy routes GET /passports/{id} + GET /matches?return_id=; POST /purchase (listing lookup → correlation_id → PurchaseCompleted event; buyer_user_id locked to JWT); GET /marketplace (channel=MARKETPLACE&status=ACTIVE, 3-attempt back-off retry); ServiceClient extended with 7 upstream methods + _safe_call + _marketplace_with_retry; PurchaseRequest/PurchaseResponse schemas; 21 tests (happy + error paths + X-User-Id forwarding + 5 hypothesis property tests) all passing | a/gateway/p2-a2 |
 | P2-B1 | B | Hyperlocal Matching Service (`MatchFound`/`NoMatchFound`, `ProductListed`) | ✅ Done | Consumes `HyperlocalMatchRequested` → fetches buyer candidates from User Service (`GET /users/candidates`) → Haversine scoring + AI rationale → persist MatchRequest/Match/Listing → emit `MatchFound`/`NoMatchFound` + `ProductListed`; `GET /matches?return_id=`, `GET /matches/{id}`, `GET /listings?channel=&status=`, `GET /listings/{id}`; SQLAlchemy models + Alembic migration; idempotent handler; graceful fallback to MARKETPLACE when User Service unavailable; all tests passing | b/matching/p2-b1 |
 | P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | ✅ Done | Consumes `MatchFound`/`NoMatchFound`/`ProductListed`/`PurchaseCompleted` → deterministic CO₂/waste/value/credits calc (calculator.py, no LLM) → persist SustainabilityRecord → emit `SustainabilityUpdated`; `GET /sustainability?return_id=&user_id=`, `GET /sustainability/{id}`, `GET /sustainability/metrics?user_id=`; SQLAlchemy model + Alembic migration; idempotent upsert; lifespan wires DB + 4 event consumers; 15 tests (calculator unit, service upsert/idempotency/metrics, routes 200/404/list) | b/sustainability/p2-b2 |
-| P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | 📋 Not started | — | — |
+| P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | ✅ Done | Fixed blocking bug: Rekognition now reads image bytes from MinIO (`Image={"Bytes":…}`) — no S3 IAM needed; switched `invoke_model` → Bedrock **Converse API** (model-portable); added prompt-injection guard (`_sanitise_user_input`) wrapping return reason in untrusted-data delimiter; added content-moderation rejection (DetectModerationLabels ≥80% blocks grading); one-retry JSON repair on parse failure for all three Bedrock calls; hardened prompts (explicit JSON schema + field constraints + security note); graceful fallback to mock on all AWS failures; `AI_MODE=mock` still passes keyless | b/ai/p2-b3 |
 | P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
 | P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | ✅ Done | Implemented DecisionCard and StatCard; integrated into /returns/[id] page. | c/web/p2-c1 |
 | P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
@@ -97,7 +97,7 @@
 | P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | ✅ Done | scripts/seed.py: full demo narrative with 8 returns (all lifecycle actions), pre-seeded grades/decisions/passports/matches/listings/sustainability; Gateway dashboard endpoints: GET /dashboard/sustainability/metrics + GET /dashboard/sustainability/records; ServiceClient methods for sustainability aggregation; 9 tests for dashboard routes | a/seed-dashboard/p3-a1 |
 | P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | ✅ Done | scripts/smoke_test.py: comprehensive E2E validation with 6 phases (health checks, auth, return submission, saga completion, dashboard, failure-path testing); failure-path tests inject malformed events → verify DLQ landing + FAILED status handling; .env.example: comprehensive documentation with section headers, inline explanations, production hardening checklist; docs/hardening-checklist.md: 10-section production readiness validation; scripts/README.md: updated with smoke_test.py documentation; all tests pass with --verbose flag | a/e2e-hardening/p3-a2 |
 | P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | ✅ Done | Reshaped `GET /sustainability/metrics` to the binding contract `{ totals: {co2_avoided_kg, waste_diverted_kg, value_recovered, green_credits, returns_processed}, breakdown: [{action, count, co2_avoided_kg, waste_diverted_kg, value_recovered}] }` — matches frontend `SustainabilityMetricsResponse` (api.ts) and SERVICE_ENDPOINTS.md; added `lifecycle_action` column (migration 002) so breakdown groups by action; green-credit accrual via calculator; metrics aggregation + per-action grouping; updated tests (+ breakdown grouping test). Gateway `/sustainability/dashboard` wrapper (recent_returns, top_categories) remains A's P3-A1. | b/sustainability/p3-b1 |
-| P3-B2 | B | Golden-path demo product + AI fallback test | 📋 Not started | — | — |
+| P3-B2 | B | Golden-path demo product + AI fallback test | ✅ Done | Golden_Path_Constants (8 literals) added to client.py + re-exported from __init__.py; conftest.py AI_MODE autouse fixture; test_golden_path.py: chain regression (test_golden_path_chain), fallback init+invocation tests (3 parametrized), 3 hypothesis PBT properties (determinism, fallback safety, proximity); seed_min.py original_price_usd aligned to GOLDEN_PATH_VALUE_ESTIMATE (120.00 > RESELL threshold); hypothesis==6.* added to pyproject.toml dev extras | — |
 | P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | ✅ Done | /sustainability page with TanStack Query hook, Zod MetricsSchema, StatCardRow (4 tiles reusing StatCard), ChartCard (Recharts BarChart with chart-1..6 tokens), API client getSustainabilityMetrics + mock fixture, full loading/empty/error/success states; ChartCard registered in ui-registry.md; tsc clean | c/web/p3-c1 |
 | P3-C2 | C | Polish + states + a11y pass | ✅ Done | NavBar Marketplace link + avatar aria-label; /matches + /marketplace migrated to TanStack Query hooks (useMatches, useMarketplaceListings) with refetch-based retry; EmptyState on /returns/[id] ungraded + /passport/[id] no-content; aria-describedby/aria-invalid on login + register inputs; heading hierarchy fixed (CardTitle h2); ProductCard alt prop; selectAsyncState pure helper; Vitest + RTL + jest-axe + fast-check test framework installed; lint/tsc/build clean | c/web/p3-c2 |
 | P3-C3 | C | Vercel deploy + final polish | 📋 Not started | — | — |
