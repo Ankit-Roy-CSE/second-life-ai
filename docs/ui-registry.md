@@ -149,14 +149,26 @@ Strictly uses semantic design tokens for grades. Circular (`rounded-full`) for i
 Use primitives + domain data. Owned by C; data shapes come from backend DTOs.
 
 ### StatCard
-- **Status:** 📋 Planned
-- **Path:** components/features/StatCard.tsx
+
+File: apps/web/src/components/features/StatCard.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Dashboard metric tile (CO₂ avoided, value recovered, green credits, etc.).
-- **Props:** `label: string`, `value: string | number`, `unit?: string`, `delta?: number`, `icon?: LucideIcon`, `tone?: "default" | "success" | "warning"`.
-- **Tokens used:** `Card`, `muted-foreground`, `text-3xl font-mono tabular-nums`, `accent` icon, `success/danger` delta.
-- **Depends on:** Card, lucide-react.
-- **Usage:** `<StatCard label="CO₂ avoided" value={128.4} unit="kg" delta={12} icon={Leaf} />`
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card         |
+| Border           | border-border   |
+| Border radius    | rounded-xl (Card default) |
+| Text — primary   | text-3xl font-mono tabular-nums font-bold |
+| Text — secondary | text-sm font-semibold text-muted-foreground uppercase tracking-wide |
+| Spacing          | p-6 (CardContent) |
+| Accent usage     | bg-muted text-accent (icon wrapper), text-success/text-danger (deltas) |
+
+**Pattern notes:**
+Uses strict typography scales for the metric (`text-3xl font-mono tabular-nums`). The label uses `uppercase tracking-wide` for a dense dashboard aesthetic. Delta text dynamically colors itself with `text-success` or `text-danger`.
 
 ### ChartCard
 - **Status:** 📋 Planned
@@ -213,20 +225,48 @@ Last updated: 2026-06-13
 Uses standard Card wrapper. A colored header (`bg-secondary`) is used to denote AI results. Internal sub-sections (grade, damage summary) use `bg-muted` and `border-border/50` to create contained visual groupings.
 
 ### DecisionCard
-- **Status:** 📋 Planned
-- **Path:** components/features/DecisionCard.tsx
+
+File: apps/web/src/components/features/DecisionCard.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Lifecycle decision (action + rationale + value estimate).
-- **Props:** `action: LifecycleAction`, `rationale: string`, `valueRecovery: number`, `sustainabilityScore: number`.
-- **Tokens used:** `action-*` colors, Card, StatCard.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card, bg-secondary (header) |
+| Border           | border-border   |
+| Border radius    | rounded-xl (Card default) |
+| Text — primary   | text-xl flex items-center gap-2 (header), text-base leading-relaxed (rationale) |
+| Text — secondary | text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 (label) |
+| Spacing          | p-6 space-y-8 (CardContent) |
+| Accent usage     | Dynamic action colors (text-accent, text-info, text-action-donate, text-primary, text-action-hyperlocal) |
+
+**Pattern notes:**
+The header uses `bg-secondary` matching the AI response aesthetic (similar to GradePanel). The specific action dynamically maps to a design system color token for the header icon and action text.
 
 ### PassportTimeline
-- **Status:** 📋 Planned
-- **Path:** components/features/PassportTimeline.tsx
+
+File: apps/web/src/components/features/PassportTimeline.tsx
+Last updated: 2026-06-14
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Vertical chronological history of a product passport.
-- **Props:** `events: { type, label, timestamp, meta? }[]`.
-- **Tokens used:** `border`, `primary` markers, `muted-foreground`, `font-mono` ids.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card (timeline item) |
+| Border           | border-border (item), bg-gradient-to-b from-transparent via-border to-transparent (timeline line) |
+| Border radius    | rounded-lg (item), rounded-full (marker) |
+| Text — primary   | font-bold text-base (title), text-foreground (details) |
+| Text — secondary | text-xs font-mono text-muted-foreground (timestamp), font-semibold capitalize (keys) |
+| Spacing          | p-4 (item padding), pl-6 space-y-8 (timeline container) |
+| Accent usage     | border-4 border-background bg-primary (marker) |
+
+**Pattern notes:**
+Uses standard structural tailwind classes (like `ml-3`) rather than arbitrary pixels. Event timestamps use `font-mono`. The vertical line is created using a subtle border-colored gradient.
 
 ### MatchCard
 - **Status:** 📋 Planned
@@ -311,7 +351,7 @@ The NavBar anchors the top of the interface. It strongly uses the `secondary` br
 | Layer | Built | In progress | Planned |
 |-------|-------|-------------|---------|
 | Primitives | 12 | 0 | 2 |
-| Composite/feature | 5 | 0 | 6 |
+| Composite/feature | 8 | 0 | 3 |
 | Layout | 1 | 0 | 2 |
 
 > Update the counts and individual statuses as components are built. The first agent to build

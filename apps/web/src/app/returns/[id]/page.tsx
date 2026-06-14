@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { PageHeader } from "@/components/features/PageHeader"
 import { GradePanel } from "@/components/features/GradePanel"
+import { DecisionCard } from "@/components/features/DecisionCard"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { ErrorState } from "@/components/features/ErrorState"
 import { apiClient } from "@/lib/api-client"
@@ -71,6 +72,15 @@ export default function ReturnDetailPage() {
         <div className="p-8 border border-border rounded-lg text-center bg-muted">
           <p className="text-muted-foreground">This return has not been graded yet.</p>
         </div>
+      )}
+
+      {returnDetail?.decision && (
+        <DecisionCard 
+          action={returnDetail.decision.action}
+          rationale={returnDetail.decision.rationale}
+          valueRecovery={returnDetail.decision.value_recovery_estimate}
+          sustainabilityScore={returnDetail.decision.sustainability_score}
+        />
       )}
     </div>
   )

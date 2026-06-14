@@ -33,6 +33,7 @@ const config = {
         ring: "hsl(var(--ring))",
         grade: { a: "#15803D", b: "#65A30D", c: "#F59E0B", d: "#DC2626" },
         gold: { 700: "#CC7A00" },
+        action: { donate: "hsl(var(--action-donate))", hyperlocal: "hsl(var(--action-hyperlocal))" },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
         popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" }
       },
