@@ -11,10 +11,10 @@ COPY services/passport/pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir -e .
 
 COPY services/passport/app ./app
-
-# COPY services/passport/alembic ./alembic
-# COPY services/passport/alembic.ini ./alembic.ini
+COPY services/passport/alembic ./alembic
+COPY services/passport/alembic.ini ./alembic.ini
 
 EXPOSE 8004
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8004"]
+# Run Alembic migrations then start the service
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8004"]
