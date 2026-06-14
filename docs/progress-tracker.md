@@ -147,7 +147,8 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 
 | Date | Raised by | Item | Type | Status |
 |------|-----------|------|------|--------|
-| _—_ | _—_ | _No blockers yet._ | — | — |
+| 2026-06-14 | B | Service-wiring gotchas hit on `docker compose up` (sustainability + matching): (1) Alembic must use Docker host `postgres` + read `DATABASE_URL`, not `localhost`; (2) only one Alembic head per service (dupe `001`/`0001` → "multiple heads"); (3) `add_ready_check(name, fn=...)` must return `"ok"`/raise, not bool. Documented in code-standards §2.4a. | Decision | ✅ Resolved |
+| _—_ | _—_ | _No other blockers._ | — | — |
 
 ---
 

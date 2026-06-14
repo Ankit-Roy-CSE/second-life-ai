@@ -22,7 +22,7 @@ from shared_py.events.schemas import (
 )
 
 from app.config import settings
-from app.db.session import _session_factory
+import app.db.session as db_module
 from app.domain.service import MatchingService
 
 logger = get_logger(__name__)
@@ -54,7 +54,7 @@ async def handle_hyperlocal_match_requested(envelope: EventEnvelope) -> None:
         },
     )
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         logger.error("db_not_initialized", extra={"correlation_id": correlation_id})
         raise RuntimeError("DB not initialised")
 
@@ -67,7 +67,7 @@ async def handle_hyperlocal_match_requested(envelope: EventEnvelope) -> None:
     passport_id: str = str(location.get("passport_id", _DEFAULT_PASSPORT_ID))
     price: float = float(location.get("price", _DEFAULT_PRICE))
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = MatchingService(
             db=db,
             user_service_url=settings.user_service_url,

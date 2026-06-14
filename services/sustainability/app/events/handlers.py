@@ -23,7 +23,7 @@ from shared_py.events.schemas import (
 )
 
 from app.config import settings
-from app.db.session import _session_factory
+import app.db.session as db_module
 from app.domain.service import SustainabilityService
 
 logger = get_logger(__name__)
@@ -69,10 +69,10 @@ async def handle_match_found(envelope: EventEnvelope) -> None:
     correlation_id = envelope.correlation_id
     data = MatchFoundEventData.model_validate(envelope.data)
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = SustainabilityService(db)
         record = await service.process_match_found(
             return_id=data.return_id,
@@ -94,10 +94,10 @@ async def handle_no_match_found(envelope: EventEnvelope) -> None:
     correlation_id = envelope.correlation_id
     data = NoMatchFoundEventData.model_validate(envelope.data)
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = SustainabilityService(db)
         record = await service.process_no_match_found(
             return_id=data.return_id,
@@ -118,10 +118,10 @@ async def handle_product_listed(envelope: EventEnvelope) -> None:
     correlation_id = envelope.correlation_id
     data = ProductListedEventData.model_validate(envelope.data)
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = SustainabilityService(db)
         record = await service.process_product_listed(
             return_id=data.return_id,
@@ -142,10 +142,10 @@ async def handle_purchase_completed(envelope: EventEnvelope) -> None:
     correlation_id = envelope.correlation_id
     data = PurchaseCompletedEventData.model_validate(envelope.data)
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = SustainabilityService(db)
         record = await service.process_purchase_completed(
             return_id=data.return_id,

@@ -26,7 +26,7 @@ async def lifespan(application: FastAPI):
     """Service startup and shutdown."""
     init_db(settings.database_url)
 
-    add_ready_check(name="postgres", checker=_check_postgres)
+    add_ready_check(name="postgres", fn=_check_postgres)
 
     consumer_task = asyncio.create_task(
         start_consumer(redis_url=settings.redis_url, group="sustainability")
@@ -43,18 +43,18 @@ async def lifespan(application: FastAPI):
     await close_db()
 
 
-async def _check_postgres() -> bool:
+async def _check_postgres() -> str:
     from sqlalchemy import text
     from app.db.session import _engine
 
     if _engine is None:
-        return False
+        raise RuntimeError("Database engine not initialized")
     try:
         async with _engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
-        return True
-    except Exception:
-        return False
+        return "ok"
+    except Exception as exc:
+        raise RuntimeError(f"Database check failed: {exc}") from exc
 
 
 app = create_app(service_name=settings.service_name, lifespan=lifespan)

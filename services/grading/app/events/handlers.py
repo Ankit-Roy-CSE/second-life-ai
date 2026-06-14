@@ -18,7 +18,7 @@ from shared_py.events.schemas import (
     ReturnSubmittedEventData,
 )
 
-from app.db.session import _session_factory
+import app.db.session as db_module
 from app.domain.service import GradingService
 
 logger = get_logger(__name__)
@@ -45,14 +45,14 @@ async def handle_return_submitted(envelope: EventEnvelope) -> None:
         },
     )
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         logger.error(
             "db_not_initialized",
             extra={"correlation_id": correlation_id},
         )
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = GradingService(db)
 
         grade = await service.grade_product(

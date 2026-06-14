@@ -21,7 +21,7 @@ from shared_py.events.schemas import (
     ProductGradedEventData,
 )
 
-from app.db.session import _session_factory
+import app.db.session as db_module
 from app.domain.service import PassportService
 
 logger = get_logger(__name__)
@@ -48,11 +48,11 @@ async def handle_product_graded(envelope: EventEnvelope) -> None:
         },
     )
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         logger.error("db_not_initialized", extra={"correlation_id": correlation_id})
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = PassportService(db)
         await service.handle_product_graded(
             return_id=data.return_id,
@@ -91,11 +91,11 @@ async def handle_lifecycle_decision_created(envelope: EventEnvelope) -> None:
         },
     )
 
-    if _session_factory is None:
+    if db_module._session_factory is None:
         logger.error("db_not_initialized", extra={"correlation_id": correlation_id})
         raise RuntimeError("DB not initialised")
 
-    async with _session_factory() as db:
+    async with db_module._session_factory() as db:
         service = PassportService(db)
         passport = await service.handle_lifecycle_decision(
             return_id=data.return_id,

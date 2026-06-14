@@ -36,7 +36,7 @@ def do_run_migrations(connection):
 
 async def run_async_migrations() -> None:
     import os
-    url = os.getenv("DATABASE_URL_SUSTAINABILITY", config.get_main_option("sqlalchemy.url"))
+    url = os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
     engine = create_async_engine(url)
     async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)

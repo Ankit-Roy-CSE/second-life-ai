@@ -100,6 +100,58 @@ services via FastAPI `Depends`. `domain/service.py` must not import `fastapi`.
  new one. Autogenerate then review.
 - No cross-service foreign keys. Reference other services' entities by **id only**.
 
+### 2.4a Service wiring gotchas (learned the hard way — verify these before `docker compose up`)
+
+These three mistakes each break a service at container start. Check them in every new service.
+
+1.**Alembic DB host must be the Docker hostname, not `localhost`.** `alembic upgrade head`
+ runs inside the container, so it must reach Postgres at `postgres:5432`, not `localhost`.
+ - `alembic.ini` → `sqlalchemy.url` fallback uses `...@postgres:5432/...` (never `localhost`).
+ - `alembic/env.py` reads the DB URL from the **same env var Docker Compose injects** —
+   `os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url"))`. Compose sets
+   `DATABASE_URL` per service; don't invent a different var name (e.g. `DATABASE_URL_X`) that
+   Compose doesn't set, or it silently falls back to the `alembic.ini` localhost default.
+ - Symptom if wrong: `OSError: Connect call failed ('127.0.0.1', 5432)` at startup.
+
+2.**Exactly one Alembic head per service.** One migration file in `alembic/versions/`. Do not
+ leave duplicate/parallel revisions (e.g. both `001_*.py` and `0001_*.py` with
+ `down_revision = None`).
+ - Symptom if wrong: `Multiple head revisions are present for given argument 'head'` and
+   `alembic upgrade head` fails.
+
+3.**`add_ready_check(name, fn)` contract.** Register with `fn=` (positional `name`, `fn`), and
+ the callable must be `async`, **return the string `"ok"` on success, and raise on failure** —
+ not `checker=`, not returning a `bool`.
+ ```python
+ async def _check_postgres() -> str:
+     async with _engine.connect() as conn:
+         await conn.execute(text("SELECT 1"))
+     return "ok"  # raise on failure; never return True/False
+ add_ready_check(name="postgres", fn=_check_postgres)
+ ```
+ - Symptom if wrong: `TypeError: unexpected keyword 'checker'`, or `/ready` always reports
+   `degraded`/503 because the shared check does `result.startswith("error")` on the return value.
+
+> After changing any of the above, rebuild without cache so the image picks it up:
+> `docker compose build --no-cache <service> && docker compose up`.
+
+4.**Never `from app.db.session import _session_factory` in event handlers.** The module-level
+ variable is `None` at import time (before lifespan runs `init_db()`). By the time an event
+ arrives, your handler's local binding still points to `None` → `"db_not_initialized"`.
+ Fix: **import the module**, access the attribute at call time:
+ ```python
+ import app.db.session as db_module  # import the MODULE
+
+ async def handle_event(envelope):
+     if db_module._session_factory is None:  # access at call time
+         raise RuntimeError("DB not initialised")
+     async with db_module._session_factory() as db:
+         ...
+ ```
+ - Symptom if wrong: `"db_not_initialized"` error followed by retries then DLQ, even though
+   the DB engine is clearly initialised (logs show `db_engine_initialized` before the error).
+
+
 ### 2.5 Configuration & secrets
 
 - All config via `pydantic-settings` `Settings(BaseSettings)` reading env vars; provide
