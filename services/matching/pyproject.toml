@@ -10,7 +10,19 @@ name = "matching"
 version = "0.1.0"
 description = "Hyperlocal Matching Service — Amazon Second Life AI"
 requires-python = ">=3.12"
-dependencies = ["shared-py"]
+dependencies = [
+    "shared-py",
+    "httpx==0.27.*",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.*",
+    "pytest-asyncio==0.24.*",
+    "httpx==0.27.*",
+    "aiosqlite==0.20.*",
+    "respx==0.21.*",
+]
 
 [tool.ruff]
 line-length = 100
