@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P1-A2 complete — Gateway (auth proxy, returns, ReturnSubmitted events)
+**Last updated:** 2026-06-14 · **Updated by:** C · **Latest:** P1-C3 complete — Checkpoint CP1 is now complete!
 
 ---
 
@@ -27,10 +27,10 @@
 | Phase | Total | ✅ Done | 🚧 In progress | ⛔ Blocked | 📋 Not started |
 |-------|-------|--------|----------------|-----------|----------------|
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
-| Phase 1 — Core | 7 | 2 | 0 | 0 | 5 |
+| Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
 | Phase 2 — Integration | 9 | 0 | 0 | 0 | 9 |
 | Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **10** | **0** | **0** | **24** |
+| **Total** | **34** | **18** | **0** | **0** | **16** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -52,7 +52,7 @@
 | P0-C2 | C | Primitives batch 1 + AppShell/NavBar | ✅ Done | Button, Card, Badge, Input, Label, Skeleton, AppShell created | c/web/p0-c2 |
 | P0-C3 | C | Frontend mock layer + typed API client | ✅ Done | api-client.ts created with mock approach using generated types | c/web/p0-c3 |
 
-**Checkpoint CP0:** ⬜ Not verified — _infra boots; seed loads; shell+tokens render vs mocks; events round-trip + DLQ; enums + REST contracts in both stacks._
+**Checkpoint CP0:** ✅ Verified — _infra boots; seed loads; shell+tokens render vs mocks; events round-trip + DLQ; enums + REST contracts in both stacks._
 
 ---
 
@@ -62,13 +62,13 @@
 |---------|-------|------|--------|-------|------|
 | P1-A1 | A | User Service (auth/JWT, profile, credits) | ✅ Done | Complete User Service with auth, profile, and cross-service endpoints. Includes: SQLAlchemy User model, Pydantic schemas (RegisterRequest, LoginRequest, UserResponse, etc.), async session management, UserRepository (CRUD), UserService (business logic with bcrypt password hashing, JWT issuance, Haversine distance for candidate matching), FastAPI routes (POST /auth/register, POST /auth/login, GET/PATCH /users/{id}, GET /users/{id}/credits, GET /users/candidates), Alembic migration for users table, tests (test_auth.py + test_users.py with 10 test cases). All 6 endpoints per SERVICE_ENDPOINTS.md contract. | a/user/p1-a1 |
 | P1-A2 | A | API Gateway + Returns intake (`ReturnSubmitted`) | ✅ Done | Complete Gateway Service with auth proxy, return management, and event emission. Includes: Return ORM model (Gateway owns Return table), Pydantic schemas (ReturnCreateRequest, ReturnResponse, ReturnListResponse, ReturnDetailResponse), async session management, JWT verification middleware (get_current_user_id), HTTP client for User Service proxy, MinIO client for media uploads, FastAPI routes (POST /auth/register → User:8001, POST /auth/login → User:8001, POST /returns with ReturnSubmitted event emission, GET /returns paginated list, GET /returns/{id} BFF aggregation stub), CORS for frontend, tests (test_auth_proxy.py + test_returns.py with 9 test cases), README documentation. All endpoints per SERVICE_ENDPOINTS.md. Ready for frontend integration. | a/gateway/p1-a2 |
-| P1-B1 | B | AI Grading Service (`ProductGraded`) | 📋 Not started | — | — |
-| P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | 📋 Not started | — | — |
-| P1-C1 | C | Auth UI + API client JWT | 📋 Not started | — | — |
-| P1-C2 | C | Return submission + grade view | 📋 Not started | — | — |
-| P1-C3 | C | Primitives batch 2 + Empty/Error/PageHeader | 📋 Not started | — | — |
+| P1-B1 | B | AI Grading Service (`ProductGraded`) | ✅ Done | Consumes `ReturnSubmitted` → `ai_client.grade_product()` → persist Grade → emit `ProductGraded`; `GET /grades/{return_id}` + `GET /grades`; SQLAlchemy Grade model + Alembic migration (001_create_grades_table); idempotent handler (skips re-grading); lifespan wires DB + event consumer; 10 tests (domain idempotency, all grades storable, route 200/404, list endpoint) | b/grading/p1-b1 |
+| P1-B2 | B | Lifecycle Decision Service (`LifecycleDecisionCreated`) | ✅ Done | Consumes `ProductGraded` → `ai_client.decide_lifecycle()` → persist LifecycleDecision → emit `LifecycleDecisionCreated`; `GET /decisions/{return_id}` + `GET /decisions`; SQLAlchemy LifecycleDecision model + Alembic migration (001_create_lifecycle_decisions_table); idempotent handler (skips re-deciding); lifespan wires DB + event consumer; 9 tests (domain idempotency, all actions storable, route 200/404, list endpoint, event handler) | b/lifecycle/p1-b2 |
+| P1-C1 | C | Auth UI + API client JWT | ✅ Done | Implemented /login and /register with react-hook-form and Zod. Updated api-client.ts to store JWT. Wrapped app in AuthProvider. | c/web/p1-c1 |
+| P1-C2 | C | Return submission + grade view | ✅ Done | Implemented /returns with FileUpload and Reason select. Grading progress and mock GradePanel on success. Implemented /returns/[id] detail view. | c/web/p1-c2 |
+| P1-C3 | C | Primitives batch 2 + Empty/Error/PageHeader | ✅ Done | Implemented Select, Tabs, Dialog, Progress, Toast, Toaster, Tooltip, EmptyState, ErrorState, PageHeader. Added all to ui-registry.md. | c/web/p1-c3 |
 
-**Checkpoint CP1:** ⬜ Not verified — _register → return → grade → decision (mock) via Gateway._
+**Checkpoint CP1:** ✅ Verified — _register → return → grade → decision (mock) via Gateway._
 
 ---
 
@@ -113,8 +113,8 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 | # | Event | Producer | Consumer(s) | Status |
 |---|-------|----------|-------------|--------|
 | 1 | `ReturnSubmitted` | gateway | grading | ✅ |
-| 2 | `ProductGraded` | grading | lifecycle, passport | 📋 |
-| 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | 📋 |
+| 2 | `ProductGraded` | grading | lifecycle, passport | ✅ |
+| 3 | `LifecycleDecisionCreated` | lifecycle | passport, matching | ✅ |
 | 4 | `PassportCreated` | passport | matching | 📋 |
 | 5 | `HyperlocalMatchRequested` | passport | matching | 📋 |
 | 6 | `MatchFound` | matching | sustainability, passport | 📋 |
@@ -131,12 +131,12 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 |---------|-------|----------|---------------|-----------|--------|-------|--------|
 | gateway | A | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | user | A | ✅ | ✅ | ✅ | n/a | ✅ | ✅ |
-| grading | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
-| lifecycle | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
+| grading | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| lifecycle | B | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | passport | A | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | matching | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
 | sustainability | B | 📋 | 📋 | 📋 | 📋 | 📋 | 📋 |
-| web | C | 📋 | n/a | 📋 | n/a | 📋 | 📋 |
+| web | C | ✅ | n/a | ✅ | n/a | 📋 | 🚧 |
 
 ---
 

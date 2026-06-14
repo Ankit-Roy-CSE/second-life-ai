@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+"use client"
 import { NavBar } from "@/components/layout/NavBar"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
