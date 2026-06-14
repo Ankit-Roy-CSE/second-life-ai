@@ -32,12 +32,34 @@ class SustainabilityListResponse(BaseModel):
     total: int
 
 
-class SustainabilityMetricsResponse(BaseModel):
-    """Response for GET /sustainability/metrics — aggregated totals."""
+class MetricsTotals(BaseModel):
+    """Aggregated totals block — matches frontend `SustainabilityMetricsResponse.totals`."""
 
-    total_co2_avoided_kg: float = Field(..., ge=0.0)
-    total_waste_diverted_kg: float = Field(..., ge=0.0)
-    total_value_recovered: float = Field(..., ge=0.0)
-    total_green_credits: float = Field(..., ge=0.0)
-    total_returns_processed: int = Field(..., ge=0)
-    records: list[SustainabilityRecordResponse]
+    co2_avoided_kg: float = Field(..., ge=0.0)
+    waste_diverted_kg: float = Field(..., ge=0.0)
+    value_recovered: float = Field(..., ge=0.0)
+    green_credits: float = Field(..., ge=0.0)
+    returns_processed: int = Field(..., ge=0)
+
+
+class MetricsBreakdownItem(BaseModel):
+    """Per-lifecycle-action breakdown row — matches frontend `breakdown[]`."""
+
+    action: str
+    count: int = Field(..., ge=0)
+    co2_avoided_kg: float = Field(..., ge=0.0)
+    waste_diverted_kg: float = Field(..., ge=0.0)
+    value_recovered: float = Field(..., ge=0.0)
+
+
+class SustainabilityMetricsResponse(BaseModel):
+    """
+    Aggregated dashboard metrics — matches the frontend contract
+    (apps/web/types/api.ts → SustainabilityMetricsResponse).
+
+    The Gateway wraps this inside DashboardMetricsResponse (adds recent_returns,
+    top_categories) for GET /sustainability/dashboard.
+    """
+
+    totals: MetricsTotals
+    breakdown: list[MetricsBreakdownItem]

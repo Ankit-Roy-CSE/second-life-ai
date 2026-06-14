@@ -175,9 +175,10 @@ class TestSustainabilityService:
             )
 
         metrics = await service.get_metrics(user_id=uid)
-        assert metrics.total_returns_processed == 3
-        assert metrics.total_co2_avoided_kg > 0
-        assert metrics.total_green_credits > 0
+        assert metrics.totals.returns_processed == 3
+        assert metrics.totals.co2_avoided_kg > 0
+        assert metrics.totals.green_credits > 0
+        assert len(metrics.breakdown) >= 1
 
     @pytest.mark.asyncio
     async def test_list_records_filter_by_return_id(self, db_session):
@@ -192,6 +193,31 @@ class TestSustainabilityService:
         items, total = await service.list_records(return_id=rid)
         assert total == 1
         assert items[0].return_id == rid
+
+    @pytest.mark.asyncio
+    async def test_metrics_breakdown_grouped_by_action(self, db_session):
+        """get_metrics breakdown groups records by lifecycle_action."""
+        service = SustainabilityService(db_session)
+        uid = str(uuid.uuid4())
+
+        # 2 hyperlocal matches + 1 marketplace listing
+        for _ in range(2):
+            await service.process_match_found(
+                return_id=str(uuid.uuid4()), product_id="p", user_id=uid,
+                category="electronics", lifecycle_action="HYPERLOCAL",
+                value_recovered=50.0, distance_km=3.0,
+            )
+        await service.process_no_match_found(
+            return_id=str(uuid.uuid4()), product_id="p", user_id=uid,
+            category="electronics", lifecycle_action="MARKETPLACE",
+            value_recovered=30.0,
+        )
+
+        metrics = await service.get_metrics(user_id=uid)
+        by_action = {b.action: b for b in metrics.breakdown}
+        assert by_action["HYPERLOCAL"].count == 2
+        assert by_action["MARKETPLACE"].count == 1
+        assert metrics.totals.returns_processed == 3
 
 
 # ── Route tests ───────────────────────────────────────────────────────────────
@@ -263,5 +289,6 @@ class TestRoutes:
 
         assert resp.status_code == 200
         body = resp.json()
-        assert body["total_returns_processed"] == 1
-        assert body["total_co2_avoided_kg"] > 0
+        assert body["totals"]["returns_processed"] == 1
+        assert body["totals"]["co2_avoided_kg"] > 0
+        assert "breakdown" in body
