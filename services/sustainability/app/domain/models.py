@@ -50,6 +50,10 @@ class SustainabilityRecord(Base):
     value_recovered: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     green_credits: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
+    # Lifecycle action that produced this record (for breakdown-by-action aggregation).
+    # RESELL / REFURBISH / DONATE / RECYCLE / HYPERLOCAL / MARKETPLACE
+    lifecycle_action: Mapped[str] = mapped_column(String(20), nullable=False, default="UNKNOWN")
+
     # Tracking which events have been processed (for idempotency)
     # PENDING → LISTED → COMPLETED
     lifecycle_stage: Mapped[str] = mapped_column(

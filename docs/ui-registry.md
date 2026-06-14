@@ -186,13 +186,18 @@ Last updated: 2026-06-14
 Uses strict typography scales for the metric (`text-3xl font-mono tabular-nums`). The label uses `uppercase tracking-wide` for a dense dashboard aesthetic. Delta text dynamically colors itself with `text-success` or `text-danger`.
 
 ### ChartCard
-- **Status:** 📋 Planned
+
+File: apps/web/src/components/features/ChartCard.tsx
+Last updated: 2026-06-15
+
+- **Status:** ✅ Built
 - **Path:** components/features/ChartCard.tsx
 - **Owner:** C
-- **Purpose:** Titled container wrapping a Recharts chart with required states.
-- **Props:** `title`, `description?`, `children` (chart), `isLoading?`, `isError?`.
-- **Tokens used:** `Card`, chart sequence `chart-1..6`.
-- **Depends on:** Card, recharts, Skeleton, ErrorState. Mark `"use client"`.
+- **Purpose:** Titled card container wrapping a Recharts BarChart with full async states (loading/empty/error/success).
+- **Props:** `title: string`, `description?: string`, `breakdown: MetricsBreakdownEntry[]`, `isLoading?: boolean`, `isError?: boolean`, `onRetry?: () => void`
+- **Tokens used:** `Card`, chart sequence `chart-1..6` (via `CHART_TOKENS` from `lib/chart-tokens.ts`)
+- **Depends on:** Card, recharts, Skeleton, EmptyState, ErrorState, `@/lib/chart-tokens`, `@/lib/schemas/sustainability`. Mark `"use client"`.
+- **Notes:** Chart Cell colors sourced exclusively from CHART_TOKENS (no raw hex). Empty breakdown → EmptyState. Must be used inside a TanStack Query context.
 
 ### FileUpload
 
@@ -361,6 +366,10 @@ Employs standard Next.js `<Image />` component with `fill` and `object-cover` wi
 - **Purpose:** Top nav + content container; wraps all routes. **Tokens:** `header-height`, `container-max`, `z-sticky`.
 
 ### NavBar
+
+File: apps/web/src/components/layout/NavBar.tsx
+Last updated: 2026-06-15
+
 - **Status:** ✅ Built · **Path:** components/layout/NavBar.tsx · **Owner:** C
 - **Purpose:** Brand, primary nav links, user menu, green-credit balance. **Depends on:** Button, Avatar.
 
@@ -375,6 +384,8 @@ Employs standard Next.js `<Image />` component with `fill` and `object-cover` wi
 
 **Pattern notes:**
 The NavBar anchors the top of the interface. It strongly uses the `secondary` brand color (Navy) to ground the design. Links hover to `primary` (Gold) to provide high-contrast interactive states.
+
+Navigation links (in order): **Returns · Matches · Marketplace · Dashboard**. The Avatar trigger carries `aria-label="User menu"` for screen-reader accessibility.
 
 ### Sidebar (optional)
 - **Status:** 📋 Planned · **Path:** components/layout/Sidebar.tsx · **Owner:** C
@@ -398,7 +409,7 @@ The NavBar anchors the top of the interface. It strongly uses the `secondary` br
 | Layer | Built | In progress | Planned |
 |-------|-------|-------------|---------|
 | Primitives | 13 | 0 | 1 |
-| Composite/feature | 10 | 0 | 1 |
+| Composite/feature | 11 | 0 | 0 |
 | Layout | 1 | 0 | 2 |
 
 > Update the counts and individual statuses as components are built. The first agent to build

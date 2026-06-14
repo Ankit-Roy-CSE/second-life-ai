@@ -5,8 +5,10 @@ import { useParams } from "next/navigation"
 import { PageHeader } from "@/components/features/PageHeader"
 import { GradePanel } from "@/components/features/GradePanel"
 import { DecisionCard } from "@/components/features/DecisionCard"
+import { EmptyState } from "@/components/features/EmptyState"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { ErrorState } from "@/components/features/ErrorState"
+import { ClipboardCheck } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
 import { ReturnDetailResponse } from "../../../../types/api"
 
@@ -69,9 +71,11 @@ export default function ReturnDetailPage() {
           defects={returnDetail.grade.defects}
         />
       ) : (
-        <div className="p-8 border border-border rounded-lg text-center bg-muted">
-          <p className="text-muted-foreground">This return has not been graded yet.</p>
-        </div>
+        <EmptyState
+          icon={ClipboardCheck}
+          title="Not graded yet"
+          description="This return hasn't been graded by the AI inspector yet. Check back shortly."
+        />
       )}
 
       {returnDetail?.decision && (

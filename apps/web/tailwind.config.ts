@@ -34,6 +34,14 @@ const config = {
         grade: { a: "#15803D", b: "#65A30D", c: "#F59E0B", d: "#DC2626" },
         gold: { 700: "#CC7A00" },
         action: { donate: "hsl(var(--action-donate))", hyperlocal: "hsl(var(--action-hyperlocal))" },
+        chart: {
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
+          6: "hsl(var(--chart-6))",
+        },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
         popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" }
       },
