@@ -82,8 +82,8 @@
 | P2-B2 | B | Sustainability Service (`SustainabilityUpdated`, metrics) | 📋 Not started | — | — |
 | P2-B3 | B | Real AI path (`AI_MODE=aws/hybrid`) + prompt tuning + fallback | 📋 Not started | — | — |
 | P2-B4 | B | Value-recovery + sustainability-score tuning | 📋 Not started | — | — |
-| P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | 📋 Not started | — | — |
-| P2-C2 | C | Passport UI (`PassportTimeline` + history) | 📋 Not started | — | — |
+| P2-C1 | C | Lifecycle decision UI (`DecisionCard`) | ✅ Done | Implemented DecisionCard and StatCard; integrated into /returns/[id] page. | c/web/p2-c1 |
+| P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
 | P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | 📋 Not started | — | — |
 
 **Checkpoint CP2:** ⬜ Not verified — _full 10-event saga runs; each step visible in UI._
