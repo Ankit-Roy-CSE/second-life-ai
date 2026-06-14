@@ -60,6 +60,7 @@ class SustainabilityService:
             user_id=user_id,
             lifecycle_stage="MATCHED",
             metrics=metrics,
+            lifecycle_action=lifecycle_action,
             correlation_id=correlation_id,
         )
 
@@ -89,6 +90,7 @@ class SustainabilityService:
             user_id=user_id,
             lifecycle_stage="LISTED",
             metrics=metrics,
+            lifecycle_action=lifecycle_action,
             correlation_id=correlation_id,
         )
 
@@ -127,6 +129,7 @@ class SustainabilityService:
             user_id=user_id,
             lifecycle_stage="LISTED",
             metrics=metrics,
+            lifecycle_action=lifecycle_action,
             correlation_id=correlation_id,
         )
 
@@ -231,17 +234,44 @@ class SustainabilityService:
     async def get_metrics(
         self, user_id: Optional[str] = None
     ) -> SustainabilityMetricsResponse:
-        """Aggregate totals for the dashboard."""
-        records, total = await self.list_records(user_id=user_id, limit=1000, offset=0)
+        """Aggregate totals + per-action breakdown for the dashboard."""
+        from app.domain.schemas import MetricsBreakdownItem, MetricsTotals
 
-        return SustainabilityMetricsResponse(
-            total_co2_avoided_kg=round(sum(r.co2_avoided_kg for r in records), 4),
-            total_waste_diverted_kg=round(sum(r.waste_diverted_kg for r in records), 4),
-            total_value_recovered=round(sum(r.value_recovered for r in records), 2),
-            total_green_credits=round(sum(r.green_credits for r in records), 2),
-            total_returns_processed=total,
-            records=records,  # type: ignore[arg-type]
+        records, total = await self.list_records(user_id=user_id, limit=10000, offset=0)
+
+        totals = MetricsTotals(
+            co2_avoided_kg=round(sum(r.co2_avoided_kg for r in records), 4),
+            waste_diverted_kg=round(sum(r.waste_diverted_kg for r in records), 4),
+            value_recovered=round(sum(r.value_recovered for r in records), 2),
+            green_credits=round(sum(r.green_credits for r in records), 2),
+            returns_processed=total,
         )
+
+        # Group by lifecycle_action
+        grouped: dict[str, dict[str, float]] = {}
+        for r in records:
+            action = r.lifecycle_action or "UNKNOWN"
+            bucket = grouped.setdefault(
+                action,
+                {"count": 0, "co2_avoided_kg": 0.0, "waste_diverted_kg": 0.0, "value_recovered": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["co2_avoided_kg"] += r.co2_avoided_kg
+            bucket["waste_diverted_kg"] += r.waste_diverted_kg
+            bucket["value_recovered"] += r.value_recovered
+
+        breakdown = [
+            MetricsBreakdownItem(
+                action=action,
+                count=int(b["count"]),
+                co2_avoided_kg=round(b["co2_avoided_kg"], 4),
+                waste_diverted_kg=round(b["waste_diverted_kg"], 4),
+                value_recovered=round(b["value_recovered"], 2),
+            )
+            for action, b in sorted(grouped.items())
+        ]
+
+        return SustainabilityMetricsResponse(totals=totals, breakdown=breakdown)
 
     # ─────────────────────────────────────────────────────────────────────────
     # Internal helpers
@@ -265,6 +295,7 @@ class SustainabilityService:
         user_id: str,
         lifecycle_stage: str,
         metrics: dict[str, float],
+        lifecycle_action: str = "UNKNOWN",
         correlation_id: Optional[str] = None,
     ) -> SustainabilityRecord:
         """
@@ -282,6 +313,7 @@ class SustainabilityService:
                 product_id=product_id,
                 user_id=user_id,
                 lifecycle_stage=lifecycle_stage,
+                lifecycle_action=lifecycle_action,
                 **metrics,
             )
             self.db.add(record)
@@ -292,6 +324,8 @@ class SustainabilityService:
             existing.value_recovered = metrics["value_recovered"]
             existing.green_credits = metrics["green_credits"]
             existing.lifecycle_stage = lifecycle_stage
+            if lifecycle_action != "UNKNOWN":
+                existing.lifecycle_action = lifecycle_action
             record = existing
 
         await self.db.commit()

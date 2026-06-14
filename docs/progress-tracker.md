@@ -86,7 +86,7 @@
 | P2-C2 | C | Passport UI (`PassportTimeline` + history) | ✅ Done | Implemented PassportTimeline; built full /passport/[id] page layout; added mock data and getPassport API client. | c/web/p2-c2 |
 | P2-C3 | C | Matching + marketplace UI (`MatchCard`, `ProductCard`) | ✅ Done | Implemented Avatar, MatchCard, ProductCard. Added /matches and /marketplace pages with mocks. | c/web/p2-c3 |
 
-**Checkpoint CP2:** ⬜ Not verified — _full 10-event saga runs; each step visible in UI._
+**Checkpoint CP2:** ✅ Verified — _full 10-event saga runs; each step visible in UI._
 
 ---
 
@@ -96,7 +96,7 @@
 |---------|-------|------|--------|-------|------|
 | P3-A1 | A | Demo-narrative seed + Gateway read-model + demo wiring | 📋 Not started | — | — |
 | P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | 📋 Not started | — | — |
-| P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | 📋 Not started | — | — |
+| P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | ✅ Done | Reshaped `GET /sustainability/metrics` to the binding contract `{ totals: {co2_avoided_kg, waste_diverted_kg, value_recovered, green_credits, returns_processed}, breakdown: [{action, count, co2_avoided_kg, waste_diverted_kg, value_recovered}] }` — matches frontend `SustainabilityMetricsResponse` (api.ts) and SERVICE_ENDPOINTS.md; added `lifecycle_action` column (migration 002) so breakdown groups by action; green-credit accrual via calculator; metrics aggregation + per-action grouping; updated tests (+ breakdown grouping test). Gateway `/sustainability/dashboard` wrapper (recent_returns, top_categories) remains A's P3-A1. | b/sustainability/p3-b1 |
 | P3-B2 | B | Golden-path demo product + AI fallback test | 📋 Not started | — | — |
 | P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | ✅ Done | /sustainability page with TanStack Query hook, Zod MetricsSchema, StatCardRow (4 tiles reusing StatCard), ChartCard (Recharts BarChart with chart-1..6 tokens), API client getSustainabilityMetrics + mock fixture, full loading/empty/error/success states; ChartCard registered in ui-registry.md; tsc clean | c/web/p3-c1 |
 | P3-C2 | C | Polish + states + a11y pass | ✅ Done | NavBar Marketplace link + avatar aria-label; /matches + /marketplace migrated to TanStack Query hooks (useMatches, useMarketplaceListings) with refetch-based retry; EmptyState on /returns/[id] ungraded + /passport/[id] no-content; aria-describedby/aria-invalid on login + register inputs; heading hierarchy fixed (CardTitle h2); ProductCard alt prop; selectAsyncState pure helper; Vitest + RTL + jest-axe + fast-check test framework installed; lint/tsc/build clean | c/web/p3-c2 |
@@ -147,6 +147,7 @@ Track each event hop as it becomes live (producer → consumer wired and exercis
 
 | Date | Raised by | Item | Type | Status |
 |------|-----------|------|------|--------|
+| 2026-06-14 | B | Saga stalled mid-chain: all 5 event-consuming services imported `_session_factory` by value at module load (always `None`) → `db_not_initialized` → DLQ. Fixed to `import app.db.session as db_module` + access at call time (grading, lifecycle, passport, matching, sustainability). Documented in code-standards §2.4a #4. **CP2 verified after fix.** | Decision | ✅ Resolved |
 | 2026-06-14 | B | Service-wiring gotchas hit on `docker compose up` (sustainability + matching): (1) Alembic must use Docker host `postgres` + read `DATABASE_URL`, not `localhost`; (2) only one Alembic head per service (dupe `001`/`0001` → "multiple heads"); (3) `add_ready_check(name, fn=...)` must return `"ok"`/raise, not bool. Documented in code-standards §2.4a. | Decision | ✅ Resolved |
 | _—_ | _—_ | _No other blockers._ | — | — |
 
