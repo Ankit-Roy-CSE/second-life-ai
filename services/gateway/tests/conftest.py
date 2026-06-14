@@ -80,3 +80,18 @@ def mock_service_client(monkeypatch):
     mock.proxy_to_user_service = AsyncMock()
     monkeypatch.setattr("app.api.routes.service_client", mock)
     return mock
+
+
+@pytest.fixture(autouse=True)
+def _clear_dependency_overrides():
+    """
+    Clear FastAPI dependency overrides after every test.
+
+    Tests register overrides for get_current_user_id / get_db (via the
+    _auth_mock / _mock_db helpers in test_aggregation.py). Without this
+    cleanup, an override from one test would leak into the next.
+    """
+    yield
+    from app.main import app
+
+    app.dependency_overrides.clear()
