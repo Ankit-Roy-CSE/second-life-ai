@@ -5,26 +5,34 @@ Gateway is the single entry point for the frontend:
 - Proxies auth endpoints to User Service
 - Creates Return entities and emits ReturnSubmitted events
 - Aggregates data from multiple services (BFF pattern)
+- Proxies Passport and Matches routes
+- Handles purchase trigger (PurchaseCompleted event)
+- Proxies marketplace listings
 """
 
+import asyncio
 import uuid
-from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared_py.events.client import publish
 from shared_py.schemas.enums import ReturnStatus
+from shared_py.web.errors import AppError
 
 from app.api.middleware import get_current_user_id, require_auth
 from app.clients.http_client import service_client
+from app.config import settings
 from app.db.session import get_db
 from app.domain.models import Return
 from app.domain.schemas import (
     ProxyLoginRequest,
     ProxyRegisterRequest,
+    PurchaseRequest,
+    PurchaseResponse,
     ReturnCreateRequest,
     ReturnDetailResponse,
     ReturnListResponse,
@@ -48,7 +56,7 @@ router = APIRouter()
 async def register(request: ProxyRegisterRequest):
     """
     Proxy registration to User Service.
-    
+
     User Service handles password hashing and user creation.
     Returns user profile (no JWT from this endpoint).
     """
@@ -68,7 +76,7 @@ async def register(request: ProxyRegisterRequest):
 async def login(request: ProxyLoginRequest):
     """
     Proxy login to User Service.
-    
+
     User Service verifies credentials and issues JWT.
     Returns { access_token, user }.
     """
@@ -98,15 +106,12 @@ async def create_return(
 ):
     """
     Create a new product return.
-    
+
     Steps:
     1. Verify JWT (user must be authenticated)
     2. Create Return entity in Gateway database
-    3. Upload media to MinIO (if provided)
-    4. Emit ReturnSubmitted event to start the saga
-    5. Return ReturnResponse
-    
-    Called by: Frontend (after user fills return form)
+    3. Emit ReturnSubmitted event to start the saga
+    4. Return ReturnResponse
     """
     # Require authentication
     user_id = require_auth(user_id)
@@ -117,7 +122,7 @@ async def create_return(
         product_id=request.product_id,
         user_id=user_id,
         reason=request.reason,
-        media=request.media_urls,  # For demo, assume media_urls are already S3 keys
+        media=request.media_urls,
         status=ReturnStatus.SUBMITTED.value,
     )
 
@@ -137,10 +142,11 @@ async def create_return(
                 "reason": return_entity.reason,
                 "media": return_entity.media,
             },
+            redis_url=settings.redis_url,
+            producer="gateway",
         )
     except Exception as e:
         # If event publish fails, rollback the transaction
-        # The saga cannot start without the event
         await db.rollback()
         raise HTTPException(
             status_code=503,
@@ -150,7 +156,6 @@ async def create_return(
     # Commit transaction only after successful event publish
     await db.commit()
 
-    # Return response
     return ReturnResponse(
         id=return_entity.id,
         product_id=return_entity.product_id,
@@ -179,46 +184,32 @@ async def list_returns(
 ):
     """
     List returns with optional filtering.
-    
+
     Query params:
     - user_id: Filter by user (optional)
     - status: Filter by ReturnStatus (optional)
     - limit: Items per page (default 20, max 100)
     - offset: Offset from start (default 0)
-    
-    Returns:
-    - Paginated list of returns
-    
-    Called by: Frontend (returns list view)
     """
-    # Build query
-    query = select(Return)
+    from sqlalchemy import func
 
-    # Apply filters
+    query = select(Return)
+    count_query = select(func.count()).select_from(Return)
+
     if user_id_filter:
         query = query.where(Return.user_id == user_id_filter)
-    if status_filter:
-        query = query.where(Return.status == status_filter)
-
-    # Get total count efficiently using COUNT(*)
-    from sqlalchemy import func
-    count_query = select(func.count()).select_from(Return)
-    if user_id_filter:
         count_query = count_query.where(Return.user_id == user_id_filter)
     if status_filter:
+        query = query.where(Return.status == status_filter)
         count_query = count_query.where(Return.status == status_filter)
-    
+
     total_result = await db.execute(count_query)
     total = total_result.scalar()
 
-    # Apply pagination
     query = query.limit(limit).offset(offset).order_by(Return.created_at.desc())
-
-    # Execute query
     result = await db.execute(query)
     returns = result.scalars().all()
 
-    # Convert to responses
     items = [
         ReturnResponse(
             id=r.id,
@@ -254,30 +245,40 @@ async def get_return_detail(
 ):
     """
     Get detailed return information (BFF aggregation).
-    
+
     Aggregates data from:
     - Gateway: Return entity
     - Grading: Grade data (if available)
     - Lifecycle: Decision data (if available)
     - Passport: Passport data (if available)
     - Matching: Matches (if available)
-    
-    Returns:
-    - ReturnDetailResponse with all aggregated data
-    
-    Called by: Frontend (return detail view)
-    
-    Note: For P1-A2, only Return data is available.
-    Other services will be integrated in later phases.
+
+    Upstream 404/unreachable → field set to null/[] (partial availability).
     """
-    # Get Return entity
+    # 1. Require authentication
+    user_id = require_auth(user_id)
+
+    # 2. DB lookup
     result = await db.execute(select(Return).where(Return.id == return_id))
     return_entity = result.scalar_one_or_none()
 
     if not return_entity:
-        raise HTTPException(status_code=404, detail=f"Return {return_id} not found")
+        raise AppError(
+            status_code=404,
+            code="not_found",
+            message=f"Return {return_id} not found",
+            correlation_id=return_id,
+        )
 
-    # Build return response
+    # 3. Concurrent fan-out to all four upstream services
+    grade_result, decision_result, passport_result, matches_result = await asyncio.gather(
+        service_client.get_grade(return_id, user_id),
+        service_client.get_decision(return_id, user_id),
+        service_client.get_passport_by_return(return_id, user_id),
+        service_client.get_matches(return_id, user_id),
+    )
+
+    # 4. Build the aggregated response
     return_response = ReturnResponse(
         id=return_entity.id,
         product_id=return_entity.product_id,
@@ -288,12 +289,183 @@ async def get_return_detail(
         created_at=return_entity.created_at.isoformat(),
     )
 
-    # Full BFF aggregation will be implemented in P2
-    # For P1, only return the Return entity
     return ReturnDetailResponse(
         return_data=return_response,
-        grade=None,
-        decision=None,
-        passport=None,
-        matches=[],
+        grade=grade_result,
+        decision=decision_result,
+        passport=passport_result,
+        matches=matches_result if matches_result is not None else [],
     )
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Passport proxy route
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/passports/{passport_id}",
+    status_code=status.HTTP_200_OK,
+    tags=["passports"],
+    summary="Get passport by ID (proxy to Passport Service)",
+)
+async def get_passport(
+    passport_id: str,
+    user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    Proxy GET /passports/{passport_id} to Passport Service.
+
+    - 404 from upstream → re-raises AppError(404)
+    - ConnectError → AppError(502, "upstream_unreachable")
+    """
+    user_id = require_auth(user_id)
+    body = await service_client.get_passport(passport_id, user_id)
+    return JSONResponse(content=body)
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Matches proxy route
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/matches",
+    status_code=status.HTTP_200_OK,
+    tags=["matches"],
+    summary="Get matches for a return (proxy to Matching Service)",
+)
+async def get_matches(
+    return_id: str = Query(..., description="UUID of the Return"),
+    user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    Proxy GET /matches?return_id= to Matching Service.
+
+    - return_id is required (FastAPI returns 422 if absent)
+    - 404 from upstream → re-raises AppError(404)
+    - ConnectError → AppError(502, "upstream_unreachable")
+    """
+    user_id = require_auth(user_id)
+    body = await service_client.get_matches_for_return(return_id, user_id)
+    return JSONResponse(content=body)
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Purchase trigger (PurchaseCompleted event)
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/purchase",
+    response_model=PurchaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["purchase"],
+    summary="Trigger a purchase and emit PurchaseCompleted event",
+)
+async def post_purchase(
+    request: PurchaseRequest,
+    user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    Trigger a purchase.
+
+    Steps:
+    1. Require authentication
+    2. Validate buyer_user_id == JWT user_id
+    3. Lookup listing → get return_id (correlation_id)
+    4. Publish PurchaseCompleted event
+    5. Return HTTP 201 with PurchaseResponse
+
+    buyer_user_id in the event is ALWAYS the JWT-derived user_id.
+    """
+    # 1. Require authentication
+    user_id = require_auth(user_id)
+
+    # 2. Validate buyer_user_id matches JWT user
+    if request.buyer_user_id != user_id:
+        raise AppError(
+            status_code=403,
+            code="forbidden",
+            message="buyer_user_id must match the authenticated user",
+        )
+
+    # 3. Lookup listing to get return_id
+    listing = await service_client.get_listing(request.listing_id, user_id)
+    correlation_id = listing["return_id"]
+
+    # 4. Publish PurchaseCompleted event
+    try:
+        event_id = await publish(
+            event_type="PurchaseCompleted",
+            correlation_id=correlation_id,
+            data={
+                "listing_id": request.listing_id,
+                "product_id": listing.get("product_id", ""),
+                "return_id": correlation_id,
+                "buyer_user_id": user_id,  # MUST come from JWT, not request body
+                "price": request.price,
+            },
+            redis_url=settings.redis_url,
+            producer="gateway",
+        )
+    except Exception as e:
+        raise AppError(
+            status_code=503,
+            code="event_publish_failed",
+            message=f"Failed to publish PurchaseCompleted event: {e}",
+            correlation_id=correlation_id,
+        ) from e
+
+    # 5. Return 201
+    return PurchaseResponse(
+        listing_id=request.listing_id,
+        buyer_user_id=user_id,
+        price=request.price,
+        event_id=event_id,
+        correlation_id=correlation_id,
+    )
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Marketplace proxy route
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/marketplace",
+    status_code=status.HTTP_200_OK,
+    tags=["marketplace"],
+    summary="Browse marketplace listings (proxy to Matching Service with retry)",
+)
+async def get_marketplace(
+    category: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
+    user_id: Optional[str] = Depends(get_current_user_id),
+):
+    """
+    Proxy GET /marketplace to Matching Service listings endpoint.
+
+    Always appends channel=MARKETPLACE and status=ACTIVE.
+    Defaults: limit=20, offset=0.
+    Retries up to 3 times with back-off on ConnectError.
+    """
+    user_id = require_auth(user_id)
+
+    # Apply defaults
+    effective_limit = limit if limit is not None else 20
+    effective_offset = offset if offset is not None else 0
+
+    # Build params dict — always include fixed filters
+    params: dict = {
+        "channel": "MARKETPLACE",
+        "status": "ACTIVE",
+        "limit": effective_limit,
+        "offset": effective_offset,
+    }
+    if category is not None:
+        params["category"] = category
+
+    body = await service_client._marketplace_with_retry(params, user_id)
+    return JSONResponse(content=body)
