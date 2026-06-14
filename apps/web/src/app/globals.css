@@ -31,6 +31,12 @@
     --ring: 36 100% 50%;
     --action-donate: 258 90% 66%;
     --action-hyperlocal: 199 89% 48%;
+    --chart-1: 152 60% 36%;  /* #22A06B accent green  */
+    --chart-2: 207 90% 54%;  /* #1E88E5 info blue     */
+    --chart-3: 36 100% 50%;  /* #FF9900 primary gold  */
+    --chart-4: 258 90% 66%;  /* #8B5CF6 violet        */
+    --chart-5: 330 81% 60%;  /* #EC4899 pink          */
+    --chart-6: 173 80% 40%;  /* #14B8A6 teal          */
     --radius: 0.25rem;
     --radius-lg: 0.5rem;
     --header-height: 60px;

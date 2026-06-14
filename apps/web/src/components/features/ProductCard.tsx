@@ -9,6 +9,8 @@ export interface ProductCardProps {
   product: {
     title: string;
     image?: string;
+    /** Accessible alt text for the product image. Defaults to `title` when omitted. */
+    alt?: string;
   };
   grade: Grade;
   price: number;
@@ -22,7 +24,7 @@ export function ProductCard({ product, grade, price, channel }: ProductCardProps
     <Card className="overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:shadow-md">
       <div className="relative aspect-square w-full bg-muted border-b border-border">
         {product.image ? (
-          <Image src={product.image} alt={product.title} fill className="object-cover" />
+          <Image src={product.image} alt={product.alt ?? product.title} fill className="object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
             No image

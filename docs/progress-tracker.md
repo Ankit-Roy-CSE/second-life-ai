@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-14 · **Updated by:** A · **Latest:** P2-A2 complete — Gateway BFF aggregation + PurchaseCompleted shipped.
+**Last updated:** 2026-06-15 · **Updated by:** C · **Latest:** P3-C2 complete — Polish + states + a11y pass (NavBar Marketplace link, TanStack Query hooks, EmptyState coverage, ARIA wiring, heading fixes).
 
 ---
 
@@ -29,8 +29,8 @@
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
 | Phase 2 — Integration | 9 | 4 | 0 | 0 | 5 |
-| Phase 3 — Dashboard/Polish | 7 | 0 | 0 | 0 | 7 |
-| **Total** | **34** | **22** | **0** | **0** | **12** |
+| Phase 3 — Dashboard/Polish | 7 | 2 | 0 | 0 | 5 |
+| **Total** | **34** | **24** | **0** | **0** | **10** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -98,8 +98,8 @@
 | P3-A2 | A | E2E smoke + failure-path test + finalize `.env.example` | 📋 Not started | — | — |
 | P3-B1 | B | Sustainability metrics finalize + dashboard endpoints | 📋 Not started | — | — |
 | P3-B2 | B | Golden-path demo product + AI fallback test | 📋 Not started | — | — |
-| P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | 📋 Not started | — | — |
-| P3-C2 | C | Polish + states + a11y pass | 📋 Not started | — | — |
+| P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | ✅ Done | /sustainability page with TanStack Query hook, Zod MetricsSchema, StatCardRow (4 tiles reusing StatCard), ChartCard (Recharts BarChart with chart-1..6 tokens), API client getSustainabilityMetrics + mock fixture, full loading/empty/error/success states; ChartCard registered in ui-registry.md; tsc clean | c/web/p3-c1 |
+| P3-C2 | C | Polish + states + a11y pass | ✅ Done | NavBar Marketplace link + avatar aria-label; /matches + /marketplace migrated to TanStack Query hooks (useMatches, useMarketplaceListings) with refetch-based retry; EmptyState on /returns/[id] ungraded + /passport/[id] no-content; aria-describedby/aria-invalid on login + register inputs; heading hierarchy fixed (CardTitle h2); ProductCard alt prop; selectAsyncState pure helper; Vitest + RTL + jest-axe + fast-check test framework installed; lint/tsc/build clean | c/web/p3-c2 |
 | P3-C3 | C | Vercel deploy + final polish | 📋 Not started | — | — |
 
 **Checkpoint CP3 (Demo-ready):** ⬜ Not verified — _judge happy path rehearsed; Vercel live; fallback verified._

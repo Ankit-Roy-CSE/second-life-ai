@@ -21,7 +21,7 @@ export function GradePanel({ grade, confidence, damageSummary, defects }: GradeP
     <Card className="overflow-hidden border-border">
       <div className="bg-secondary p-4 text-secondary-foreground">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-primary" />
+          <ShieldCheck className="h-5 w-5 text-primary" aria-hidden={true} />
           <h3 className="font-semibold text-lg">AI Inspection Results</h3>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function GradePanel({ grade, confidence, damageSummary, defects }: GradeP
             <ul className="space-y-1.5">
               {defects.map((defect, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden={true} />
                   <span>{defect}</span>
                 </li>
               ))}
@@ -76,7 +76,7 @@ export function GradePanel({ grade, confidence, damageSummary, defects }: GradeP
           <div className="space-y-2">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detected Defects</h4>
             <div className="flex items-center gap-2 text-sm text-success">
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-4 w-4" aria-hidden={true} />
               <span>No visible defects detected.</span>
             </div>
           </div>

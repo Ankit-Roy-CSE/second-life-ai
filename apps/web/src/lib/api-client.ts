@@ -1,5 +1,6 @@
 import { ReturnResponse, ReturnDetailResponse, DashboardMetricsResponse, LoginRequest, LoginResponse, RegisterRequest, ReturnCreateRequest, PassportResponse, MatchResponse, ListingResponse } from "../../types/api";
 import { ReturnStatus, Grade, LifecycleAction, ListingChannel, ListingStatus } from "../../types/enums";
+import { MetricsSchema, type SustainabilityMetrics } from "@/lib/schemas/sustainability";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false"; // Default to true in Phase 0
@@ -109,6 +110,17 @@ export const apiClient = {
     const res = await fetch(`${API_BASE_URL}/sustainability/dashboard`);
     if (!res.ok) throw new Error("Failed to fetch dashboard metrics");
     return res.json();
+  },
+
+  async getSustainabilityMetrics(userId?: string): Promise<SustainabilityMetrics> {
+    if (USE_MOCKS) {
+      return MetricsSchema.parse(MOCKS.sustainabilityMetrics);
+    }
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    const res = await fetch(`${API_BASE_URL}/sustainability/metrics${query}`);
+    if (!res.ok) throw new Error("Failed to fetch sustainability metrics");
+    const json = await res.json();
+    return MetricsSchema.parse(json);
   }
 };
 
@@ -278,5 +290,21 @@ const MOCKS = {
     },
     recent_returns: [],
     top_categories: []
+  },
+  sustainabilityMetrics: {
+    totals: {
+      co2_avoided_kg: 120.5,
+      waste_diverted_kg: 45.2,
+      value_recovered: 850.0,
+      green_credits: 320,
+      returns_processed: 12,
+    },
+    breakdown: [
+      { action: "RESELL",     count: 5, co2_avoided_kg: 60.0, waste_diverted_kg: 20.0, value_recovered: 500.0 },
+      { action: "REFURBISH",  count: 3, co2_avoided_kg: 30.5, waste_diverted_kg: 12.2, value_recovered: 250.0 },
+      { action: "DONATE",     count: 2, co2_avoided_kg: 18.0, waste_diverted_kg:  8.0, value_recovered:  60.0 },
+      { action: "RECYCLE",    count: 1, co2_avoided_kg:  6.0, waste_diverted_kg:  3.0, value_recovered:  20.0 },
+      { action: "HYPERLOCAL", count: 1, co2_avoided_kg:  6.0, waste_diverted_kg:  2.0, value_recovered:  20.0 },
+    ],
   }
 };
