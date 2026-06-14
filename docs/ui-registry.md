@@ -74,14 +74,24 @@ Generic, token-driven, no business logic. Many are generated/adapted from shadcn
 - **Notes:** For grades use `GradeBadge`, not this.
 
 ### GradeBadge
-- **Status:** 📋 Planned
-- **Path:** components/ui/GradeBadge.tsx
+
+File: apps/web/src/components/ui/GradeBadge.tsx
+Last updated: 2026-06-13
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Display condition grade A/B/C/D with reserved grade colors.
-- **Props:** `grade: "A" | "B" | "C" | "D"`, `size?: "sm" | "md" | "lg"`, `showLabel?: boolean`.
-- **Variants:** keyed by grade (grade soft bg + text).
-- **Tokens used:** `grade-a..d` + soft variants from [ui-tokens.md](ui-tokens.md) §2.4.
-- **Notes:** Pair color with the letter (don't rely on color alone). Used by GradePanel, PassportTimeline, ProductCard.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-grade-a...d  |
+| Border radius    | rounded-full (icon), rounded-md (label) |
+| Text — primary   | text-grade-a...d-foreground |
+| Text size        | text-xs (sm), text-sm (md), text-lg (lg) |
+| Spacing          | px-3 (label), mr-1 (icon gap) |
+
+**Pattern notes:**
+Strictly uses semantic design tokens for grades. Circular (`rounded-full`) for icon only, `rounded-md` with `px-3` when text label is shown. Used by `GradePanel`, `PassportTimeline`, `ProductCard`.
 
 ### Input / Textarea
 - **Status:** 📋 Planned
@@ -97,21 +107,21 @@ Generic, token-driven, no business logic. Many are generated/adapted from shadcn
 - **Purpose:** Accessible form label. **Tokens:** `text-sm font-medium foreground`.
 
 ### Select
-- **Status:** 📋 Planned · **Path:** components/ui/Select.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Select.tsx · **Owner:** C
 - **Purpose:** Dropdown select (Radix). **Tokens:** `input`, `popover`, `z-dropdown`.
 - **Notes:** Keep Radix keyboard/focus behavior.
 
 ### Tabs
-- **Status:** 📋 Planned · **Path:** components/ui/Tabs.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Tabs.tsx · **Owner:** C
 - **Purpose:** Sectioned navigation within a view (Radix). **Tokens:** `muted`, `primary`, `border`.
 
 ### Dialog / Modal
-- **Status:** 📋 Planned · **Path:** components/ui/Dialog.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Dialog.tsx · **Owner:** C
 - **Purpose:** Modal overlay (Radix). **Tokens:** `popover`, `shadow-lg`, `z-overlay/z-modal`.
 - **Notes:** Focus trap + `Esc` close (Radix default — keep).
 
 ### Progress
-- **Status:** 📋 Planned · **Path:** components/ui/Progress.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Progress.tsx · **Owner:** C
 - **Purpose:** Linear progress / confidence bar. **Props:** `value: number` (0–100), `variant?`.
 - **Tokens:** `muted` track, `primary`/grade fill, `rounded-full`.
 
@@ -120,12 +130,12 @@ Generic, token-driven, no business logic. Many are generated/adapted from shadcn
 - **Purpose:** Loading placeholder. **Tokens:** `muted`, `rounded-md`, pulse animation.
 
 ### Toast / Toaster
-- **Status:** 📋 Planned · **Path:** components/ui/Toast.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Toast.tsx · **Owner:** C
 - **Purpose:** Transient feedback. **Tokens:** semantic colors, `shadow-lg`, `z-toast`.
 - **Notes:** One provider at root; trigger via `useToast()`.
 
 ### Tooltip
-- **Status:** 📋 Planned · **Path:** components/ui/Tooltip.tsx · **Owner:** C
+- **Status:** ✅ Built · **Path:** components/ui/Tooltip.tsx · **Owner:** C
 - **Purpose:** Hover/focus hints (Radix). **Tokens:** `popover`, `z-popover`.
 
 ### Avatar
@@ -158,21 +168,49 @@ Use primitives + domain data. Owned by C; data shapes come from backend DTOs.
 - **Depends on:** Card, recharts, Skeleton, ErrorState. Mark `"use client"`.
 
 ### FileUpload
-- **Status:** 📋 Planned
-- **Path:** components/features/FileUpload.tsx
+
+File: apps/web/src/components/features/FileUpload.tsx
+Last updated: 2026-06-13
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Drag-and-drop image/video upload for returns (thumbnails + progress).
-- **Props:** `accept`, `maxFiles=8`, `onChange(files)`, `value`, `disabled?`.
-- **Tokens used:** `border` (dashed), `muted`, `primary` (active), `rounded-xl`.
-- **Notes:** Validate type/size; show per-file progress; keyboard accessible.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-primary/5 (drag/hover), bg-muted (thumbnails) |
+| Border           | border-2 border-dashed border-border (active: border-primary) |
+| Border radius    | rounded-lg (dropzone), rounded-md (thumbnails) |
+| Text — primary   | text-foreground |
+| Text — secondary | text-muted-foreground |
+| Spacing          | p-8 (dropzone), gap-4 (grid) |
+| Hover state      | hover:border-primary hover:bg-primary/5 |
+| Accent usage     | bg-danger (remove button hover) |
+
+**Pattern notes:**
+Upload area uses dashed `border-border`, highlighting with `primary` border and subtle `bg-primary/5` background on hover or drag-over. Image thumbnails use simple `rounded-md` borders.
 
 ### GradePanel
-- **Status:** 📋 Planned
-- **Path:** components/features/GradePanel.tsx
+
+File: apps/web/src/components/features/GradePanel.tsx
+Last updated: 2026-06-13
+
+- **Status:** ✅ Built
 - **Owner:** C
 - **Purpose:** Show grading result — grade, confidence, damage summary.
-- **Props:** `grade`, `confidence` (0–1), `damageSummary: string`, `defects: string[]`.
-- **Depends on:** GradeBadge, Progress, Card.
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | bg-card, bg-secondary (header), bg-muted (inner blocks) |
+| Border           | border-border   |
+| Border radius    | rounded-xl (Card default), rounded-lg (inner blocks) |
+| Text — primary   | text-foreground |
+| Text — secondary | text-muted-foreground, text-secondary-foreground |
+| Spacing          | p-6 (CardContent), p-4 (headers/blocks), gap-8 |
+| Accent usage     | text-primary (shield), text-warning (alerts), text-success (checks) |
+
+**Pattern notes:**
+Uses standard Card wrapper. A colored header (`bg-secondary`) is used to denote AI results. Internal sub-sections (grade, damage summary) use `bg-muted` and `border-border/50` to create contained visual groupings.
 
 ### DecisionCard
 - **Status:** 📋 Planned
@@ -207,21 +245,21 @@ Use primitives + domain data. Owned by C; data shapes come from backend DTOs.
 - **Depends on:** Card, GradeBadge, next/image.
 
 ### EmptyState
-- **Status:** 📋 Planned
+- **Status:** ✅ Built
 - **Path:** components/features/EmptyState.tsx
 - **Owner:** C
-- **Purpose:** Standard empty view (icon + message + action). Required by [ui-rules.md](ui-rules.md) §5.
+- **Purpose:** Standard empty view (icon + message + action). Required by ui-rules.md §5.
 - **Props:** `icon?`, `title`, `description?`, `action?`.
 
 ### ErrorState
-- **Status:** 📋 Planned
+- **Status:** ✅ Built
 - **Path:** components/features/ErrorState.tsx
 - **Owner:** C
 - **Purpose:** Standard inline error with retry. Required by ui-rules §5.
 - **Props:** `title?`, `message`, `onRetry?`.
 
 ### PageHeader
-- **Status:** 📋 Planned
+- **Status:** ✅ Built
 - **Path:** components/features/PageHeader.tsx
 - **Owner:** C
 - **Purpose:** Page title + subtitle + optional actions slot.
@@ -272,8 +310,8 @@ The NavBar anchors the top of the interface. It strongly uses the `secondary` br
 
 | Layer | Built | In progress | Planned |
 |-------|-------|-------------|---------|
-| Primitives | 6 | 0 | 8 |
-| Composite/feature | 0 | 0 | 11 |
+| Primitives | 12 | 0 | 2 |
+| Composite/feature | 5 | 0 | 6 |
 | Layout | 1 | 0 | 2 |
 
 > Update the counts and individual statuses as components are built. The first agent to build
