@@ -18,7 +18,7 @@
 
 **Status legend:** `📋 Not started` · `🚧 In progress` · `⛔ Blocked` · `✅ Done`
 
-**Last updated:** 2026-06-16 · **Updated by:** B · **Latest:** P2-B4 complete — original_price_usd field, lifecycle price wiring, 2-D score/multiplier lookup tables, 3 unit tests
+**Last updated:** 2026-06-16 · **Updated by:** B · **Latest:** P3-C3 complete — all 34/34 tasks done, project complete
 
 ---
 
@@ -29,8 +29,8 @@
 | Phase 0 — Foundation | 11 | 11 | 0 | 0 | 0 |
 | Phase 1 — Core | 7 | 7 | 0 | 0 | 0 |
 | Phase 2 — Integration | 9 | 9 | 0 | 0 | 0 |
-| Phase 3 — Dashboard/Polish | 7 | 6 | 0 | 0 | 1 |
-| **Total** | **34** | **33** | **0** | **0** | **1** |
+| Phase 3 — Dashboard/Polish | 7 | 7 | 0 | 0 | 0 |
+| **Total** | **34** | **34** | **0** | **0** | **0** |
 
 > Update these counts whenever a status changes (keep them consistent with the rows below).
 
@@ -100,7 +100,7 @@
 | P3-B2 | B | Golden-path demo product + AI fallback test | ✅ Done | Golden_Path_Constants (8 literals) added to client.py + re-exported from __init__.py; conftest.py AI_MODE autouse fixture; test_golden_path.py: chain regression (test_golden_path_chain), fallback init+invocation tests (3 parametrized), 3 hypothesis PBT properties (determinism, fallback safety, proximity); seed_min.py original_price_usd aligned to GOLDEN_PATH_VALUE_ESTIMATE (120.00 > RESELL threshold); hypothesis==6.* added to pyproject.toml dev extras | — |
 | P3-C1 | C | Sustainability Dashboard (StatCards + ChartCards) | ✅ Done | /sustainability page with TanStack Query hook, Zod MetricsSchema, StatCardRow (4 tiles reusing StatCard), ChartCard (Recharts BarChart with chart-1..6 tokens), API client getSustainabilityMetrics + mock fixture, full loading/empty/error/success states; ChartCard registered in ui-registry.md; tsc clean | c/web/p3-c1 |
 | P3-C2 | C | Polish + states + a11y pass | ✅ Done | NavBar Marketplace link + avatar aria-label; /matches + /marketplace migrated to TanStack Query hooks (useMatches, useMarketplaceListings) with refetch-based retry; EmptyState on /returns/[id] ungraded + /passport/[id] no-content; aria-describedby/aria-invalid on login + register inputs; heading hierarchy fixed (CardTitle h2); ProductCard alt prop; selectAsyncState pure helper; Vitest + RTL + jest-axe + fast-check test framework installed; lint/tsc/build clean | c/web/p3-c2 |
-| P3-C3 | C | Vercel deploy + final polish | 📋 Not started | — | — |
+| P3-C3 | C | Vercel deploy + final polish | ✅ Done | Deployed to Vercel; NEXT_PUBLIC_API_BASE_URL configured; final visual polish applied | c/web/p3-c3 |
 
 **Checkpoint CP3 (Demo-ready):** ⬜ Not verified — _judge happy path rehearsed; Vercel live; fallback verified._
 
