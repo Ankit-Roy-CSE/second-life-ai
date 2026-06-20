@@ -113,7 +113,7 @@ function ListingGrid({ listings, isLoading, isError, error, onRetry }: ListingGr
           href={listing.passport_id ? `/passport/${listing.passport_id}` : undefined}
           product={{
             title: listing.product?.title || "Unknown Product",
-            image: (listing.product as any)?.image_url ?? undefined,
+            image: (listing.product as unknown as { image_url?: string })?.image_url ?? undefined,
             alt: listing.product?.title || "Product image",
           }}
           grade={listing.channel === ListingChannel.HYPERLOCAL ? Grade.B : Grade.A}

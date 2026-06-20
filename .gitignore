@@ -58,3 +58,5 @@ postgres-data/
 # === Misc ===
 *.bak
 *.tmp
+.vercel
+.env*
